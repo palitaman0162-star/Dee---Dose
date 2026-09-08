@@ -1,1200 +1,657 @@
 <script>
-
-let swRegistration = null;
-
-let medicines =
-JSON.parse(localStorage.getltem(‘deedose_item
-s')) IO
-
-let logs =
-JSON.parse(localStorage.getltem(‘deedose_logs'
-)) NO:
-
-let profile =
-JSON.parse(localStorage.getltem(‘deedose_profi
-le')) || { gender: 'male’, age: ‘adult’, pet: ‘E23’ }:
-
-let currentLang = ‘th;
-
-let alarmInterval = null;
-
-let audioCtx = null;
-
-let activeAlarmMed = null;
-
-let calDate = new Date();
-
-// & Vandansevuviawaladmsumensonanuy
-vilivasousn
-===== p-02.txt =====
-function unlockAudio() {
-
-if (taudioCtx) {
-
-audioCtx = new (window.AudioContext ||
-window.webkitAudioContext)();
-
-}
-
-if (audioCtx.state === 'suspended’) {
-audioCtx.resume();
-
-}
-
-}
-
-window.addEventListener(‘click', unlockAudio, {
-once: true });
-window.addEventListener(‘touchstart’,
-unlockAudio, { once: true });
-
-// ANVZLUHU Service Worker aA1NsULALAAU
-MPUuaANWALIU
-
-if (‘serviceWorker' in navigator) {
-window.addEventListener(‘load’, () => {
-navigator.serviceWorker.register(‘sw.js').then(reg
-=> {
-===== p-03.txt =====
-swRegistration = reg;
-
-}).catch(err => console.log(‘Service Worker
-Registration Failed: ', err));
-
-});
-
-}
-
-// MUMsenwusirwavaavensrunsanna lau
-(Quick Presets)
-
-const recommendedMeds = [
-
-{
-
-name: "wasiamiuaa (Paracetamol)’",
-
-dose: "500 mg’,
-
-amount: '1°,
-
-category: "(_) yitdia (Tablet)",
-
-meal: "vavai1nis (After Meals)",
-
-time: "08:00",
-
-propTH: "“vaamMaimsuIasvauLANtavaAvUIU
-Aaq uazan la",
-
-propEN: "Relieves mild to moderate pain and
-reduces fever.',
-===== p-04.txt =====
-warningTH: "WauvrULA 8 Lda/Iu (4,000 mg)
-uaz LimsmudasianiuaAn 5 Ju"
-
-i
-
-{
-
-name: "\wVviseu (Cetirizine)",
-
-dose: "10 mg’,
-
-amount: '1°,
-
-category: "\_) siusim (Tablet)",
-
-meal: "fauna (Before Bed)",
-
-time: "21:00",
-
-DropTH: "SAW IDIAITULW LB inun lua ann Audi
-AULA",
-
-propEN: "Treats allergy symptoms like runny
-nose, sneezing, and hives.",
-
-warningTH: “aravin iAmaImaiwesa AIsse4N
-matudgunws"
-
-},
-
-{
-
-name: "715181119712 (Salol & Menthol)",
-
-dose: "15 ml,
-===== p-05.txt =====
-amount: "1",
-
-category:"\§ Wwavaruia/urth (Liquid)",
-
-meal: "vavainis (After Meals)",
-
-time: "12:00",
-
-propTH: "wav Iaviay INLADA WuUvia’ VAAN
-Durr’,
-
-propEN: "Relieves stomachache, flatulence, and
-mild diarrhea.",
-
-warningTH: "\weineanaumunnanse"
-
-},
-
-{
-
-name: "atlan#yvaau (Amoxicillin)",
-
-dose: "500 mg’,
-
-amount: "1",
-
-category: "“@ uausya (Capsule)",
-
-meal: "wavainis (After Meals)",
-
-time: "08:00",
-
-propTH: "snuisauvatiay sawimsdatanwiau
-wi la/aadaau",
-
-propEN: ‘Antibiotic used to treat bacterial
-===== p-06.txt =====
-infections.’,
-
-warningTH: "saVMIUAAKANUIUnNAGINUWNES/
-lndwnsay WangAuas"
-
-h;
-
-{
-
-name: "stun la sAaane (Bromhexine)",
-
-dose: "8 mg’,
-
-amount: '1°,
-
-category: "\_) sitsim (Tablet)",
-
-meal: "vavai1nis (After Meals)",
-
-time: "13:00",
-
-DropTH: "wIwWIULANY AYAIVLANUY UITLNININNIG
-‘la",
-
-propEN: "Mucolytic agent for easing coughs with
-MUCUS..,
-
-warningTH: "Asai MwA Waghwavaw
-LANVY
-
-}
-
-|
-===== p-07.txt =====
-const dict = {
-
-th: {
-
-profileHeader: "vauan le & duquaayvain’,
-genderLabel: "\we", ageLabel: "#1978",
-recHeader: "\) 911119 & Amiuvingiau (Quick
-Presets)",
-
-formAdd: “WwiaissAatse 1 lal", formEdit: "wr la
-NWAIB,
-
-medName: "az", medDose: "wuAEen (Losi
-500mg, 10ml)", medAmount: "S1UIuslaase (A
-\ia/Agu)", medCategory: "SUuUU / MUIMUAEN’,
-medMeal: "sqwwaAwiny’,
-
-startDate: "Julauelu", endDate: "tuauan’,
-medTime: "MaIwATLADU",
-
-saveBtn: "Uuvindayau Dee - Dose", cancelBtn:
-"smuan", listHeader: "IuMaywsiavsuusemu",
-calHeader: "as wuUunAAMISVIUEN",
-
-alarmTitle: "G3 Dee - Dose Isinaimusnuarue!",
-petTalk: "asnanmunilasnmaiusasy!",
-
-days: ['a1,, '3', 'a', 'w', ‘way, ‘er, 'a’]
-===== p-08.txt =====
-},
-
-en: {
-
-profileHeader: "User Profile & Health
-Companion", genderLabel: "Gender", ageLabel:
-"Age Group’,
-
-recHeader: "\y Drug Knowledge & Quick
-Presets’,
-
-formAdd: "Add New Medication", formEdit: "Edit
-Medication’,
-
-medName: "Medicine Name", medDose: "Dose
-(e.g. 500mg, 10ml)", medAmount: "Amount per
-Take", medCategory: “Form / Category’,
-medMeal: "Meal Timing’,
-
-startDate: "Start Date", endDate: "End Date’,
-medTime: "Reminder Time’,
-
-saveBtn: "Save Medication’, cancelBtn: "Cancel",
-listHeader: "Scheduled Medications", calHeader:
-"Medication Calendar’,
-
-alarmTitle: "G3 Dee - Dose: Time to take
-medicine!", petTalk: "Don't forget to take your
-===== p-09.txt =====
-medicine on time!",
-
-days: ['Sun’, ‘Mon’, 'Tue’, ‘Wed’, 'Thu’, 'Fri’, ‘Sat'’]
-
-}
-
-};
-
-function trackUserAccess() {
-
-let accessLogs =
-JSON.parse(localStorage.getltem(‘deedose_acce
-ss_history’)) || [];
-
-const now = new Date();
-
-const dateStr = now.toLocaleString(‘th-TH’);
-const deviceType = /MobilAndroid/
-i.test(navigator.userAgent) ?'| | iiafa (Mobile)' :
-‘El mauwaimas (Desktop)’;
-
-accessLogs.unshift({ time: dateStr, device:
-deviceType });
-
-if(accessLogs.length > 15) accessLogs.pop();
-localStorage.setltem(‘'deedose_access_history’,
-===== p-10.txt =====
-JSON. stringify(accessLogs));
-renderAccessLogs();
-
-}
-
-function renderAccessLogs() {
-
-const accessLogs =
-JSON.parse(localStorage.getltem(‘deedose_acce
-ss_history’)) || [];
-
-const tbody =
-document.getElementByld(‘accessLogList’);
-if(tbody) {
-
-tbody.innerHTML = accessLogs.map(I =>
-<tr&gt;&lt;td&gt;${I.time}</td><td>S{I.device}&lt;/
-td&gt;&lt;/tr>).join(’);
-
-}
-
-}
-
-// VOAWEIOBUWIILA|L Pop-up waNnAU
-function requestNotificationPermission() {
-unlockAudio();
-===== p-11.txt =====
-if (Notification' in window) {
-Notification.requestPermission().then(permissio
-n => {
-
-if (permission === 'granted’) {
-alert(Uanrauavigau Dee - Dose HuaaMLA!):
-showSystemNotification("#: Dee - Dose szuu
-uduGauwson lao1u", "ssuuWanrsudeaau
-LQUUIOU MAA);
-
-helse {
-
-alert(‘AMsudaGauantaad luUsaDaanara lucie
-AIVAILUIVILWAA );
-
-}
-
-});
-
-} else {
-
-alert(‘ua1sivasit lsisavsuArsudutdauuuy Push’);
-}
-
-}
-
-// WAGNAISUAIILADULUL Pop-up myunanndaiu
-function showSystemNotification(title, body) {
-===== p-12.txt =====
-if (Notification’ in window &&
-Notification.permission === ‘'granted’) {
-const options = {
-
-body: body,
-
-icon: "https://cdn-icons-png.flaticon.com/
-512/3063/3063822.png,,
-
-badge: "https://cdn-icons-png.flaticon.com/
-512/3063/3063822.pnqg’,
-requirelnteraction: true,
-
-vibrate: [300, 100, 300]
-
-};
-
-if (swRegistration) {
-swRegistration.showNotification(title, options);
-}else {
-
-new Notification(title, options);
-
-}
-
-}
-
-}
-===== p-13.txt =====
-document.getElementByld(‘userGender'’).value =
-profile.gender;
-document.getElementByld(‘userAge’).value =
-profile.age;
-document.getElementByld(‘petSelect').value =
-profile. pet;
-document.getElementByld(‘petDisplay’).innerText
-= profile. pet;
-document.getElementByld(‘alarmPet’).innerText
-= profile. pet;
-
-function saveProfile() {
-
-profile.gender =
-document.getElementByld(‘userGender’).value;
-profile.age =
-document.getElementByld(‘userAge’).value;
-profile.pet =
-document.getElementByld(‘petSelect').value;
-localStorage.setltem(‘deedose_profile’,
-JSON.stringify(profile));
-===== p-14.txt =====
-}
-
-function updatePet() {
-
-const pet =
-document.getElementByld(‘petSelect').value;
-document.getElementByld(‘petDisplay’).innerText
-= pet;
-document.getElementByld(‘alarmPet'’).innerText
-= pet,
-
-saveProfile();
-
-}
-
-function changeLang() {
-
-currentLang =
-document.getElementByld(‘langSelect’).value;
-const t = dict[currentLang];
-document.getElementByld('t-
-profileHeader’).innerText = t.profileHeader;
-document.getElementByld('t-
-genderLabel').innerText = t.genderLabel;
-===== p-15.txt =====
-document.getElementByld('t-
-ageLabel').innerText = t.ageLabel;
-document.getElementByld('t-
-recHeader').innerText = t.recHeader;
-document.getElementByld('t-
-medName’).innerText = t.medName;
-document.getElementByld('t-
-medDose’).innerText = t.medDose;
-document.getElementByld('t-
-medAmount'’).innerText = t.medAmount;
-document.getElementByld('t-
-medCategory’).innerText = t.medCategory;
-document.getElementByld('t-
-medMeal').innerText = t.medMeal;
-document.getElementByld('t-
-startDate’).innerText = t.startDate;
-document.getElementByld(‘t-endDate’).innerText
-= t.endDate;
-
-document.getElementByld('t-
-medTime’).innerText = t.medTime;
-===== p-16.txt =====
-document.getElementByld('t-
-listHeader’).innerText = t.listHeader;
-document.getElementByld('t-
-calHeader').innerText = t.calHeader;
-document.getElementByld('t-
-alarmTitle’).innerText = t.alarmTitle;
-document.getElementByld(‘petTalk’).innerText =
-t.petTalk;
-if(!\document.getElementByld(‘editld').value) {
-document.getElementByld(‘formTitle’).innerText
-= t.formAdd;
-document.getElementByld(‘btnSave’).innerText =
-t.saveBtn;
-
-}
-
-renderRecommendations();
-
-renderList();
-
-renderCalendar();
-
-}
-===== p-17.txt =====
-function renderRecommendations() {
-
-const container =
-document.getElementByld(‘recommendedContai
-ner’):
-
-container.innerHTML = "";
-recommendedMeds.forEach((m, idx) => {
-
-const prop = currentLang === ‘th ? m.propTH :
-m.propEN;
-
-container.innerHTML += &lt;div class="rec-card"
-style="border: 1px solid #e2e8f0; padding: 12px;
-border-radius: 10px; margin-bottom: 10px;'&dgt;
-&lth4&gt; ${m.name}</h4>
-
-<p style="font-size:1 3px;
-color:#475569;"><strong>asswaAmi:</strong> $
-{prop}&lt;/p&gt; &lt;p style="font-size:1 2px;
-color:#64748b; &gt;&lt;strong&gt-vuIAHr:&lt;/
-strong&gt; ${m.dose} | © nmaruuyvila: ${m.time}
-U.&It;/p&gt; &lt;div style="margin-top: 8px;
-display: flex; gap: 8px;"&gt; &lt;button class="btn-
-use-rec” onclick="useRecommendation(S{idx})"
-===== p-18.txt =====
-style="padding:4px 8px; font-size:12px;">%& uA la
-VaNanauvuvin</button>
-
-<button onclick="quickAddPreset(${idx})"
-style="padding:4px 8px; font-size:1 2px;
-background:#22c55e; color:white; border:none;
-border-radius:5px; cursor:pointer;"&gt; 7 Wines
-LMIIIWVUUN (UNIU)&lt;/button&gt; &lt;/div&gt;
-&lt;/div&gt;;
-
-});
-
-}
-
-// WAU MAAAVEN SUM Law lasiaonait
-function quickAddPreset(idx) {
-
-unlockAudio();
-
-const rec = recommendedMedslidx];
-
-const todayStr = new
-Date().tolSOString().split(‘T)[0];
-
-const medObj = {
-
-id: Date.now(),
-===== p-19.txt =====
-name: rec.name,
-
-dose: rec.dose,
-
-amount: rec.amount || ‘1°,
-
-category: rec.category,
-
-meal: rec.meal,
-
-start: todayStr,
-
-end: "2099-12-31", // musiatiasnatyu
-isEveryday: true,
-
-time: rec.time || "08:00"
-
-};
-
-medicines.push(medOb)j);
-localStorage.setltem(‘'deedose_items'’,
-JSON.stringify(medicines));
-renderList();
-
-renderCalendar();
-
-alert(iWaisigAns "S{rec.name}" wrenrswudeaiau
-Usvd TI UlsvuIabbad! ):
-
-}
-===== p-20.txt =====
-function useRecommendation(idx) {
-
-const rec = recommendedMeds[idx];
-
-const todayStr = new
-Date().tolSOString().split(‘T)[0];
-document.getElementByld(‘medName’).value =
-rec.name;
-document.getElementByld(‘medDose’).value =
-rec.dose;
-document.getElementByld(‘medAmount’).value
-= rec.amount || "1";
-document.getElementByld(‘medCategory’).value
-= rec.category;
-document.getElementByld(‘medMeal’).value =
-rec.meal:
-document.getElementByld(‘medTime’).value =
-rec.time || '08:00°;
-document.getElementByld(‘startDate’).value =
-todayStr;
-
-/ Jeudumunntuan luda
-===== p-21.txt =====
-const everydayCheck =
-document.getElementByld(‘everydayCheck’);
-
-if (everydayCheck) everydayCheck.checked =
-true;
-
-toggleEverydayOption();
-
-window.scrollTo({ top:
-document.getElementByld(‘formTitle’).offsetTop
-- 20, behavior: 'smooth });
-
-}
-
-function toggleEverydayOption() {
-
-const isEveryday =
-document.getElementByld(‘everydayCheck')?.che
-cked;
-
-const endDatelnput =
-document.getElementByld(‘endDate’);
-
-if (endDatelnput) {
-
-if (isEveryday) {
-
-endDatelnput.value = "2099-12-31';
-===== p-22.txt =====
-endDatelnput.disabled = true;
-
-} else {
-
-endDatelnput.disabled = false;
-
-if (endDatelnput.value === "2099-12-31")
-endDatelnput.value = ";
-
-}
-
-}
-
-}
-
-function saveMedicine() {
-
-unlockAudio();
-
-const name =
-document.getElementByld(‘medName’).value.tri
-m();
-
-const dose =
-document.getElementByld(‘medDose’).value.trim
-();
-
-const amount =
-document.getElementByld(‘medAmount’).value;
-const category =
-===== p-23.txt =====
-document.getElementByld(‘medCategory’).value;
-const meal =
-document.getElementByld(‘medMeal’).value;
-const start =
-document.getElementByld(‘startDate’).value;
-const isEveryday =
-document.getElementByld(‘everydayCheck’)?.che
-cked;
-
-let end =
-document.getElementByld(‘endDate’).value;
-const time =
-document.getElementByld(‘medTime’).value;
-const editld =
-document.getElementByld(‘editld').value;
-
-if (isEveryday) {
-
-end = "2099-12-31"; // Avua lHudeGaunntu
-uuu liditunumary
-
-}
-===== p-24.txt =====
-if(Iname || !dose || !amount || !time || !start || !end)
-{
-
-alert(currentLang === 'th' ? "Aqansandaya lv
-ATVEUuVAVAY' : "Please fill in all fields.");
-return;
-
-}
-
-const medObj = { id: editld ? Number(editld) :
-Date.now(), name, dose, amount, category, meal,
-start, end, isEveryday, time };
-
-if(editld) {
-
-medicines = medicines.map(m => m.id == editld
-? medObj : m);
-
-}else {
-
-medicines.push(medOb)j);
-
-}
-
-localStorage.setltem(‘deedose_items'’,
-JSON.stringify(medicines));
-===== p-25.txt =====
-resetForm();
-
-renderList();
-
-renderCalendar();
-
-}
-
-function editMed(id) {
-
-const item = medicines.find(m => m.id === id);
-if(!item) return;
-document.getElementByld(‘editld').value =
-item.id;
-document.getElementByld(‘medName’).value =
-item.name;
-document.getElementByld(‘medDose’).value =
-item.dose;
-document.getElementByld(‘medAmount’).value
-= jtem.amount;
-document.getElementByld(‘medCategory’).value
-= jtem.category;
-document.getElementByld(‘medMeal’).value =
-item.meal:
-===== p-26.txt =====
-===== p-27.txt =====
-lay = "block’;
-
-}
-
-function deleteMed(id) {
-
-if(confirm(currentLang === ‘th’? "Susuarisau
-siuansit?" : "Are you sure you want to delete?")) {
-medicines = medicines.filter(m => m.id !== id);
-localStorage.setltem(‘deedose_items’,
-JSON.stringify(medicines));
-
-renderList();
-
-renderCalendar();
-
-}
-
-}
-
-function resetForm() {
-document.getElementByld(‘editld').value = ";
-document.getElementByld(‘medName’).value = "
-document.getElementByld(‘medDose’).value = "";
-document.getElementByld(‘medAmount’).value
-="\"
-===== p-28.txt =====
-document.getElementByld(‘startDate’).value = ";
-document.getElementByld(‘endDate’).value = ""
-document.getElementByld(‘medTime’).value = "’;
-const everydayCheck =
-document.getElementByld(‘everydayCheck’);
-
-if (everydayCheck) {
-
-everydayCheck.checked = false;
-toggleEverydayOption();
-
-}
-document.getElementByld(‘formTitle’).innerText
-= dict[currentLang].formAdd;
-document.getElementByld(‘btnSave’).innerText =
-dict[currentLang].saveBtn;
-document.getElementByld(‘btnCancel’).style.disp
-lay = "none’;
-
-}
-
-function renderList() {
-
-const container =
-document.getElementByld(‘medicineList’);
-===== p-29.txt =====
-container.innerHTML = "";
-
-if(medicines.length === 0) {
-container.innerHTML = <p style="text-
-align:center; color:#94a3b8; padding: 20px
-0;"&gt;S{currentLang === 'th' ? “laifisuansyy lu
-3zUU' : 'No medications found.’}</p>’;
-
-return;
-
-}
-
-medicines.forEach(m => {
-
-const durationText = (m.isEveryday || m.end ===
-"2099-12-31") ? "J muunty (lisituauaa)” :
-S{m.start} Au S{m.end}:
-
-container.innerHTML += &lt;div class="med-
-card"&gt; &lt;div class="med-info"&gt; &lt;h4&gt;$
-{m.name} (S{m.dose})&lt;/h4&gt;
-
-Slt p&gt;&lt;strong&gt; UU :&lt;/strong&gt; $
-{m.category} | <strong>v1uAsvaz:</strong> $
-{m.amount} iia /Fuslt/p&gt; &lt;p&gt; ¥
-===== p-30.txt =====
-&lt;strong&gt;#I91IA7:&lt;/strong&gt; ${m.meal}
-</p>
-
-<p>${durationText} | © &lt;strong&gt;${m.time}
-u.</strong></p>
-
-</div>
-
-<div class="med-actions'>
-
-<button class="btn-sm btn-edit"
-onclick="editMed(S{m.id})"&gt;\ &lt;/button&gt;
-&lt;button class="btn-sm btn-delete"
-onclick="deleteMed(${m.id})">" 7</button>
-</div>
-
-</div>
-
-});
-
-}
-
-function renderCalendar() {
-
-const year = calDate.getFullYear();
-
-const month = calDate.getMonth();
-===== p-31.txt =====
-document.getElementByld(‘calMonthYear’).inner
-Text = calDate.toLocaleDateString(currentLang
-=== 'th' ? 'th-TH': ‘en-US’, { month: ‘long’, year:
-‘numeric’ });
-
-const daysNameContainer =
-document.getElementByld(‘calDaysName’);
-daysNameContainer.innerHTML =
-dict[currentLang].days.map(d => <div class="cal-
-day-name"&gt;${d}</div>>).join(’);
-
-const firstDay = new Date(year, month,
-1).getDay();
-
-const daysInMonth = new Date(year, month + 1,
-0).getDate();
-
-const grid = document.getElementByld(‘calGrid’);
-grid.innerHTML = ";
-
-for(let i = 0; i < firstDay; i++) {
-===== p-32.txt =====
-grid.innerHTML += <div&gt;&lt;/div>;
-
-}
-
-const todayStr = new
-Date().tolSOString().split('T')[0};
-
-for(let d = 1; d <= daysInMonth; d++) {
-
-const dateStr = ${year}-S{String(month +
-1).padStart(2, '0')}-S{String(d).padStart(2, '0')};
-const isToday = dateStr === todayStr ? ‘today’ : °;
-const hasMeds = medicines.some(m => dateStr
->= m.start && dateStr <= m.end);
-
-const hasLogs = logs[dateStr] &&
-Object.keys(logs[dateStr]).length > 0;
-grid.innerHTML += &lt;div class="cal-dateS
-{isToday}"
-
-onclick="openLogModal(’ «atestr))” at:it; spanat; {]}</
-Sspan>
-===== p-33.txt =====
-<div>S{hasLogs ? '&lt;span class="cal-
-dot"&gt;&It;/span&gt;’ : (hasMeds ? '&lt;span
-style="font-size:1 0px; color:#94a3b8;"&gt;& &lt;/
-span&gt; : ")}&lt;/div&gt; &lt;/div&gt;;
-
-}
-
-}
-
-function changeMonth(offset) {
-calDate.setMonth(calDate.getMonth() + offset);
-renderCalendar();
-
-}
-
-function openLogModal(dateStr) {
-document.getElementByld(‘logDateTitle’).innerTe
-xt = 7 S{dateStr};
-
-const content =
-document.getElementByld(‘logContent’);
-content.innerHTML = ";
-
-const scheduledMeds = medicines. filter(m =>
-===== p-34.txt =====
-dateStr >= m.start && dateStr <= m.end);
-if(scheduledMeds.length === 0) {
-content.innerHTML = <p style="color:#64748b;
-text-align:center;"&gt;${currentLang === 'th' ? "Lidl
-MwA suiwisiauvi1u lutuil' : ‘No scheduled
-medicines for this date.’}</p>; } else {
-scheduledMeds.forEach(m =&gt; { const isTaken
-= logs[dateStr] && logs[dateStr][m.id];
-content.innerHT ML +=
-
-<div style="margin-bottom:1 0px; padding:1 Opx;
-border:1px solid var(--border); border-radius:8px;
-display:flex; justify-content:space-between; align-
-items:center;'>
-
-<div>
-
-<strong>S{m.name}&lt;/strong&gt; ($
-{m.dose})<br>
-
-<small>${m.amount} iia/au [${m.meal}] - © $
-{m.time} u.&lt/small&gt; &lt;/div&gt; &ltinput
-type="checkbox" S{isTaken ? ‘checked’ : "}
-===== p-35.txt =====
-onchange="toggleMedLog('${dateStr}', ${m.id},
-this.checked)" style="width:20px; height:20px;
-cursor:pointer;'>
-
-</div>
-
-});
-
-}
-document.getElementByld(‘logModal’).style.displ
-ay = "flex';
-
-}
-
-function toggleMedLog(dateStr, medid,
-isChecked) {
-
-if(‘logs[dateStr]) logs[dateStr] = {};
-if(isChecked) {
-
-logs[dateStr][medId] = true;
-
-}else {
-
-delete logs[dateStr][medld];
-
-}
-===== p-36.txt =====
-localStorage.setltem(‘deedose_logs’,
-
-JSON. stringify(logs));
-
-renderCalendar();
-
-}
-
-function closeLogModal() {
-document.getElementByld(‘logModal'’).style.displ
-ay = ‘none’;
-
-}
-
-// & wuuananwviassaoatavwmundanan ly
-function playPetSound() {
-
-try {
-
-if (taudioCtx) audioCtx = new
-(window.AudioContext ||
-window.webkitAudioContext)();
-
-if (audioCtx.state === 'suspended’)
-audioCtx.resume();
-
-const pet = profile.pet || ‘£9’;
-===== p-37.txt =====
-const now = audioCtx.currentTime;
-
-if (pet === 'Ey’) {
-
-// Ga) asusntile (Meow)
-
-const osc = audioCtx.createOscillator();
-
-const gain = audioCtx.createGain();
-
-osc.type = ‘sine’;
-osc.frequency.setValueAtTime(420, now);
-
-osc. frequency.exponentialRampToValueAtTime(
-780, now + 0.25);
-osc.frequency.exponentialRampToValueAtTime(
-360, now + 0.65);
-
-gain.gain.setValueAtTime(0, now);
-gain.gain.linearRampToValueAtTime(0.4, now +
-0.1);
-gain.gain.exponentialRampToValueAtTime(0.01,
-now + 0.65);
-
-osc.connect(gain);
-===== p-38.txt =====
-gain.connect(audioCtx.destination);
-osc.start(now);
-
-osc.stop(now + 0.65);
-
-} else if (pet === 'G>"') {
-
-// © WaBIVNrAW (Bark)
-
-[0, 0.18].forEach(delay => {
-
-const osc = audioCtx.createOscillator();
-
-const gain = audioCtx.createGain();
-
-osc.type = "sawtooth’;
-osc.frequency.setValueAtTime(170, now +
-delay);
-osc.frequency.exponentialRampToValueAtTime(
-75, now + delay + 0.11);
-gain.gain.setValueAtTime(0.5, now + delay);
-gain.gain.exponentialRampToValueAtTime(0.01,
-now + delay + 0.11);
-
-osc.connect(gain);
-===== p-39.txt =====
-gain.connect(audioCtx.destination);
-osc.start(now + delay);
-
-osc.stop(now + delay + 0.11);
-
-});
-
-} else if (pet === 'S" || pet === '') {
-
-// & \Aeundasauy (Chirp)
-
-const osc = audioCtx.createOscillator();
-
-const gain = audioCtx.createGain();
-
-osc.type = ‘sine’;
-osc.frequency.setValueAtTime(2200, now);
-osc.frequency.linearRampToValueAtTime(3200,
-now + 0.08);
-
-osc.frequency.linearRamp ToValueAtTime(1900,
-now + 0.16);
-
-gain.gain.setValueAtTime(0.35, now);
-gain.gain.exponentialRampToValueAtTime(0.01,
-now + 0.16);
-===== p-40.txt =====
-osc.connect(gain);
-gain.connect(audioCtx.destination);
-osc.start(now);
-
-osc.stop(now + 0.16);
-
-} else if (pet === 't3') {
-
-// &3§ waLNIUA (Oink)
-
-const osc = audioCtx.createOscillator();
-const gain = audioCtx.createGain();
-
-osc.type = ‘sawtooth’;
-osc.frequency.setValueAtTime(120, now);
-osc.frequency.linearRampToValueAtTime(90,
-now + 0.2);
-
-gain.gain.setValueAtTime(0.4, now);
-gain.gain.exponentialRampToValueAtTime(0.01,
-now + 0.2):
-
-osc.connect(gain);
-gain.connect(audioCtx.destination);
-===== p-41.txt =====
-osc.start(now);
-
-osc.stop(now + 0.2);
-
-}else {
-
-// aAuaauvia lu
-
-const osc = audioCtx.createOscillator();
-
-const gain = audioCtx.createGain();
-
-osc.type = ‘sine’;
-osc.frequency.setValueAtTime(600, now);
-osc.frequency.exponentialRampToValueAtTime(
-900, now + 0.2);
-
-gain.gain.setValueAtTime(0.3, now);
-gain.gain.exponentialRamp ToValueAtTime(0.01,
-now + 0.2):
-
-osc.connect(gain);
-gain.connect(audioCtx.destination);
-osc.start(now);
-
-osc.stop(now + 0.2);
-===== p-42.txt =====
-}
-if (navigator.vibrate) navigator.vibrate([300, 150,
-300));
-} catch(e) {
-console.log("Audio play error: ", e);
-}
-}
-function triggerAlarm(med) {
-activeAlarmMed = med;
-document.getElementByld(‘alarmDetails’).innerT
-ext = & 1:${med.name}
-(
-latex Ol
-{med.dose})\n ¥ d1uwIw:
-{med.amount} tiia/Bu
-===== p-43.txt =====
-latex Ol
-{med.meal}]\n©@ wan:
-{med.time} w.°;
-document.getElementByld(‘alarmModal’).style.di
-splay = "flex";
-// waa Pop-up Notification wanniwaiu
-showSystemNotification(
-& Dee - Dose Istnarmiusnua! (S{profile.pet ||
-')'}),07: S{med.name} (S{med.dose}) - wu $
-{med.amount} tia [S{med.meal}]”
-);
-if(!alarmInterval) {
-playPetSound();
-alarminterval = setinterval(() => {
-playPetSound(); }, 1200);
-===== p-44.txt =====
-}
-
-}
-
-function stopAlarm() {
-document.getElementByld(‘alarmModal').style.di
-splay = ‘none’;
-
-if(alarmInterval) {
-clearlnterval(alarmInterval);
-
-alarmInterval = null;
-
-}
-
-if(activeAlarmMed) {
-
-const todayStr = new
-Date().tolSOString().split(‘T')[0};
-toggleMedLog(todayStr, activeAlarmMed. id,
-true);
-
-activeAlarmMed = null;
-
-}
-
-}
-===== p-45.txt =====
-// ANAADUVNAVAAUMIUH
-
-setinterval(() => {
-
-const now = new Date();
-
-const year = now.getFullYear();
-
-const month = String(now.getMonth() +
-1).padStart(2, '0');
-
-const day = String(now.getDate()).padStart(2, '0');
-const todayStr = “S{year}- monn - {day}’;
-
-const hours =
-String(now.getHours()).padStart(2, '0');
-
-const mins =
-String(now.getMinutes()).padStart(2, '0');
-
-const secs =
-String(now.getSeconds()).padStart(2, '0');
-const timeStr = ${hours}:${mins};
-
-if(secs === "00") {
-
-medicines.forEach(m => {
-
-if(todayStr >= m.start && todayStr <= m.end &&
-===== p-46.txt =====
-m.time === timeStr) {
-triggerAlarm(m);
-
-}
-
-});
-
-}
-
-}, 1000);
-trackUserAccess();
-renderRecommendations();
-renderList();
-renderCalendar();
+    let swRegistration = null;
+    let medicines = JSON.parse(localStorage.getItem('deedose_items')) || [];
+    let logs = JSON.parse(localStorage.getItem('deedose_logs')) || {};
+    let profile = JSON.parse(localStorage.getItem('deedose_profile')) || { gender: 'male', age: 'adult', pet: '🐱' };
+   
+    let currentLang = 'th';
+    let alarmInterval = null;
+    let audioCtx = null;
+    let activeAlarmMed = null;
+    let calDate = new Date();
+
+    // 🔊 ปลดล็อกระบบเสียงเมื่อมีการแตะหรือคลิกบนหน้าเว็บครั้งแรก
+    function unlockAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+    window.addEventListener('click', unlockAudio, { once: true });
+    window.addEventListener('touchstart', unlockAudio, { once: true });
+
+    // ลงทะเบียน Service Worker สำหรับแจ้งเตือนภายนอกหน้าเว็บ
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').then(reg => {
+                swRegistration = reg;
+            }).catch(err => console.log('Service Worker Registration Failed: ', err));
+        });
+    }
+
+    // รายการยาแนะนำและคลังยาด่วนพร้อมกดใช้งาน (Quick Presets)
+    const recommendedMeds = [
+        {
+            name: "พาราสีตามอล (Paracetamol)",
+            dose: "500 mg",
+            amount: "1",
+            category: "⚪ ยาเม็ด (Tablet)",
+            meal: "หลังอาหาร (After Meals)",
+            time: "08:00",
+            propTH: "บรรเทาอาการปวดระดับเล็กน้อยถึงปานกลาง และลดไข้",
+            propEN: "Relieves mild to moderate pain and reduces fever.",
+            warningTH: "ห้ามทานเกิน 8 เม็ด/วัน (4,000 mg) และไม่ควรทานติดต่อกันเกิน 5 วัน"
+        },
+        {
+            name: "เซทิริซีน (Cetirizine)",
+            dose: "10 mg",
+            amount: "1",
+            category: "⚪ ยาเม็ด (Tablet)",
+            meal: "ก่อนนอน (Before Bed)",
+            time: "21:00",
+            propTH: "รักษาอาการแพ้ เช่น น้ำมูกไหล จาม ผื่นคัน คันตา",
+            propEN: "Treats allergy symptoms like runny nose, sneezing, and hives.",
+            warningTH: "อาจทำให้เกิดอาการง่วงซึม ควรระวังการขับขี่ยานพาหนะ"
+        },
+        {
+            name: "ยาธาตุน้ำขาว (Salol & Menthol)",
+            dose: "15 ml",
+            amount: "1",
+            category: "🥤 ผงละลายน้ำ/ยาน้ำ (Liquid)",
+            meal: "หลังอาหาร (After Meals)",
+            time: "12:00",
+            propTH: "แก้ปวดท้อง จุกเสียด แน่นท้อง ท้องเสียถ่ายเป็นน้ำ",
+            propEN: "Relieves stomachache, flatulence, and mild diarrhea.",
+            warningTH: "เขย่าขวดก่อนทานทุกครั้ง"
+        },
+        {
+            name: "อม็อกซีซิลลิน (Amoxicillin)",
+            dose: "500 mg",
+            amount: "1",
+            category: "💊 แคปซูล (Capsule)",
+            meal: "หลังอาหาร (After Meals)",
+            time: "08:00",
+            propTH: "ต้านเชื้อแบคทีเรีย รักษาการติดเชื้อทางเดินหายใจ/คออักเสบ",
+            propEN: "Antibiotic used to treat bacterial infections.",
+            warningTH: "ต้องทานติดต่อกันจนหมดตามแพทย์/เภสัชกรสั่ง ห้ามหยุดยาเอง"
+        },
+        {
+            name: "ยาแก้ไอ ดักเสมหะ (Bromhexine)",
+            dose: "8 mg",
+            amount: "1",
+            category: "⚪ ยาเม็ด (Tablet)",
+            meal: "หลังอาหาร (After Meals)",
+            time: "13:00",
+            propTH: "ช่วยขับเสมหะ ละลายเสมหะ บรรเทาอาการไอ",
+            propEN: "Mucolytic agent for easing coughs with mucus.",
+            warningTH: "ควรดื่มน้ำตามมากๆ เพื่อช่วยละลายเสมหะ"
+        }
+    ];
+
+    const dict = {
+        th: {
+            profileHeader: "ข้อมูลผู้ใช้ & คู่หูดูแลสุขภาพ", genderLabel: "เพศ", ageLabel: "ช่วงวัย",
+            recHeader: "💡 ยาน่ารู้ & กดบันทึกด่วน (Quick Presets)",
+            formAdd: "เพิ่มรายการยาใหม่", formEdit: "แก้ไขรายการยา",
+            medName: "ชื่อยา", medDose: "ขนาดยา (เช่น 500mg, 10ml)", medAmount: "จำนวนต่อครั้ง (กี่เม็ด/กี่ชิ้น)", medCategory: "รูปแบบ / หมวดหมู่ยา", medMeal: "ช่วงเวลาทานยา",
+            startDate: "วันเริ่มต้น", endDate: "วันสิ้นสุด", medTime: "เวลาแจ้งเตือน",
+            saveBtn: "บันทึกข้อมูลยา Dee - Dose", cancelBtn: "ยกเลิก", listHeader: "รายการยาที่ต้องรับประทาน", calHeader: "ตารางบันทึกการทานยา",
+            alarmTitle: "🚨 Dee - Dose ได้เวลาทานยาแล้วนะ!", petTalk: "อย่าลืมทานยาให้ตรงเวลานะครับ!",
+            days: ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส']
+        },
+        en: {
+            profileHeader: "User Profile & Health Companion", genderLabel: "Gender", ageLabel: "Age Group",
+            recHeader: "💡 Drug Knowledge & Quick Presets",
+            formAdd: "Add New Medication", formEdit: "Edit Medication",
+            medName: "Medicine Name", medDose: "Dose (e.g. 500mg, 10ml)", medAmount: "Amount per Take", medCategory: "Form / Category", medMeal: "Meal Timing",
+            startDate: "Start Date", endDate: "End Date", medTime: "Reminder Time",
+            saveBtn: "Save Medication", cancelBtn: "Cancel", listHeader: "Scheduled Medications", calHeader: "Medication Calendar",
+            alarmTitle: "🚨 Dee - Dose: Time to take medicine!", petTalk: "Don't forget to take your medicine on time!",
+            days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+        }
+    };
+
+    function trackUserAccess() {
+        let accessLogs = JSON.parse(localStorage.getItem('deedose_access_history')) || [];
+        const now = new Date();
+        const dateStr = now.toLocaleString('th-TH');
+        const deviceType = /Mobi|Android/i.test(navigator.userAgent) ? '📱 มือถือ (Mobile)' : '💻 คอมพิวเตอร์ (Desktop)';
+
+        accessLogs.unshift({ time: dateStr, device: deviceType });
+        if(accessLogs.length > 15) accessLogs.pop();
+
+        localStorage.setItem('deedose_access_history', JSON.stringify(accessLogs));
+        renderAccessLogs();
+    }
+
+    function renderAccessLogs() {
+        const accessLogs = JSON.parse(localStorage.getItem('deedose_access_history')) || [];
+        const tbody = document.getElementById('accessLogList');
+        if(tbody) {
+            tbody.innerHTML = accessLogs.map(l => `<tr><td>${l.time}</td><td>${l.device}</td></tr>`).join('');
+        }
+    }
+
+    // ขออนุญาตแจ้งเตือน Pop-up นอกหน้าเว็บ
+    function requestNotificationPermission() {
+        unlockAudio();
+        if ('Notification' in window) {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    alert('เปิดการแจ้งเตือน Dee - Dose เรียบร้อยแล้ว!');
+                    showSystemNotification("🏥 Dee - Dose ระบบแจ้งเตือนพร้อมใช้งาน", "ระบบเปิดการแจ้งเตือนเรียบร้อยแล้วครับ");
+                } else {
+                    alert('การแจ้งเตือนถูกปิดอยู่ โปรดเปิดอนุญาตในตั้งค่าของเบราว์เซอร์');
+                }
+            });
+        } else {
+            alert('เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือนแบบ Push');
+        }
+    }
+
+    // แสดงการแจ้งเตือนแบบ Pop-up ภายนอกหน้าเว็บ
+    function showSystemNotification(title, body) {
+        if ('Notification' in window && Notification.permission === 'granted') {
+            const options = {
+                body: body,
+                icon: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
+                badge: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
+                requireInteraction: true,
+                vibrate: [300, 100, 300]
+            };
+
+            if (swRegistration) {
+                swRegistration.showNotification(title, options);
+            } else {
+                new Notification(title, options);
+            }
+        }
+    }
+
+    document.getElementById('userGender').value = profile.gender;
+    document.getElementById('userAge').value = profile.age;
+    document.getElementById('petSelect').value = profile.pet;
+    document.getElementById('petDisplay').innerText = profile.pet;
+    document.getElementById('alarmPet').innerText = profile.pet;
+
+    function saveProfile() {
+        profile.gender = document.getElementById('userGender').value;
+        profile.age = document.getElementById('userAge').value;
+        profile.pet = document.getElementById('petSelect').value;
+        localStorage.setItem('deedose_profile', JSON.stringify(profile));
+    }
+
+    function updatePet() {
+        const pet = document.getElementById('petSelect').value;
+        document.getElementById('petDisplay').innerText = pet;
+        document.getElementById('alarmPet').innerText = pet;
+        saveProfile();
+    }
+
+    function changeLang() {
+        currentLang = document.getElementById('langSelect').value;
+        const t = dict[currentLang];
+        document.getElementById('t-profileHeader').innerText = t.profileHeader;
+        document.getElementById('t-genderLabel').innerText = t.genderLabel;
+        document.getElementById('t-ageLabel').innerText = t.ageLabel;
+        document.getElementById('t-recHeader').innerText = t.recHeader;
+        document.getElementById('t-medName').innerText = t.medName;
+        document.getElementById('t-medDose').innerText = t.medDose;
+        document.getElementById('t-medAmount').innerText = t.medAmount;
+        document.getElementById('t-medCategory').innerText = t.medCategory;
+        document.getElementById('t-medMeal').innerText = t.medMeal;
+        document.getElementById('t-startDate').innerText = t.startDate;
+        document.getElementById('t-endDate').innerText = t.endDate;
+        document.getElementById('t-medTime').innerText = t.medTime;
+        document.getElementById('t-listHeader').innerText = t.listHeader;
+        document.getElementById('t-calHeader').innerText = t.calHeader;
+        document.getElementById('t-alarmTitle').innerText = t.alarmTitle;
+        document.getElementById('petTalk').innerText = t.petTalk;
+       
+        if(!document.getElementById('editId').value) {
+            document.getElementById('formTitle').innerText = t.formAdd;
+            document.getElementById('btnSave').innerText = t.saveBtn;
+        }
+        renderRecommendations();
+        renderList();
+        renderCalendar();
+    }
+
+    function renderRecommendations() {
+        const container = document.getElementById('recommendedContainer');
+        container.innerHTML = "";
+        recommendedMeds.forEach((m, idx) => {
+            const prop = currentLang === 'th' ? m.propTH : m.propEN;
+            container.innerHTML += `
+                <div class="rec-card" style="border: 1px solid #e2e8f0; padding: 12px; border-radius: 10px; margin-bottom: 10px;">
+                    <h4>💊 ${m.name}</h4>
+                    <p style="font-size:13px; color:#475569;"><strong>สรรพคุณ:</strong> ${prop}</p>
+                    <p style="font-size:12px; color:#64748b;"><strong>ขนาดยา:</strong> ${m.dose} | ⏰ เวลาแนะนำ: ${m.time} น.</p>
+                    <div style="margin-top: 8px; display: flex; gap: 8px;">
+                        <button class="btn-use-rec" onclick="useRecommendation(${idx})" style="padding:4px 8px; font-size:12px;">✏️ แก้ไขข้อมูลก่อนบันทึก</button>
+                        <button onclick="quickAddPreset(${idx})" style="padding:4px 8px; font-size:12px; background:#22c55e; color:white; border:none; border-radius:5px; cursor:pointer;">⚡ เพิ่มยาเข้าตารางทันที (ทุกวัน)</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // ฟังก์ชันเพิ่มยาจากคลังยาด่วนทันทีโดยไม่ต้องพิมพ์
+    function quickAddPreset(idx) {
+        unlockAudio();
+        const rec = recommendedMeds[idx];
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        const medObj = {
+            id: Date.now(),
+            name: rec.name,
+            dose: rec.dose,
+            amount: rec.amount || "1",
+            category: rec.category,
+            meal: rec.meal,
+            start: todayStr,
+            end: "2099-12-31", // ทานต่อเนื่องทุกวัน
+            isEveryday: true,
+            time: rec.time || "08:00"
+        };
+
+        medicines.push(medObj);
+        localStorage.setItem('deedose_items', JSON.stringify(medicines));
+        renderList();
+        renderCalendar();
+        alert(`เพิ่มรายการ "${rec.name}" เข้าตารางแจ้งเตือนประจำวันเรียบร้อยแล้ว!`);
+    }
+
+    function useRecommendation(idx) {
+        const rec = recommendedMeds[idx];
+        const todayStr = new Date().toISOString().split('T')[0];
+        document.getElementById('medName').value = rec.name;
+        document.getElementById('medDose').value = rec.dose;
+        document.getElementById('medAmount').value = rec.amount || "1";
+        document.getElementById('medCategory').value = rec.category;
+        document.getElementById('medMeal').value = rec.meal;
+        document.getElementById('medTime').value = rec.time || "08:00";
+        document.getElementById('startDate').value = todayStr;
+       
+        // ปรับเป็นทานทุกวันอัตโนมัติ
+        const everydayCheck = document.getElementById('everydayCheck');
+        if (everydayCheck) everydayCheck.checked = true;
+        toggleEverydayOption();
+
+        window.scrollTo({ top: document.getElementById('formTitle').offsetTop - 20, behavior: 'smooth' });
+    }
+
+    function toggleEverydayOption() {
+        const isEveryday = document.getElementById('everydayCheck')?.checked;
+        const endDateInput = document.getElementById('endDate');
+        if (endDateInput) {
+            if (isEveryday) {
+                endDateInput.value = "2099-12-31";
+                endDateInput.disabled = true;
+            } else {
+                endDateInput.disabled = false;
+                if (endDateInput.value === "2099-12-31") endDateInput.value = "";
+            }
+        }
+    }
+
+    function saveMedicine() {
+        unlockAudio();
+        const name = document.getElementById('medName').value.trim();
+        const dose = document.getElementById('medDose').value.trim();
+        const amount = document.getElementById('medAmount').value;
+        const category = document.getElementById('medCategory').value;
+        const meal = document.getElementById('medMeal').value;
+        const start = document.getElementById('startDate').value;
+        const isEveryday = document.getElementById('everydayCheck')?.checked;
+        let end = document.getElementById('endDate').value;
+        const time = document.getElementById('medTime').value;
+        const editId = document.getElementById('editId').value;
+
+        if (isEveryday) {
+            end = "2099-12-31"; // กำหนดให้แจ้งเตือนทุกวันแบบไม่มีวันหมดอายุ
+        }
+
+        if(!name || !dose || !amount || !time || !start || !end) {
+            alert(currentLang === 'th' ? "กรุณากรอกข้อมูลให้ครบถ้วนทุกช่อง" : "Please fill in all fields.");
+            return;
+        }
+
+        const medObj = { id: editId ? Number(editId) : Date.now(), name, dose, amount, category, meal, start, end, isEveryday, time };
+
+        if(editId) {
+            medicines = medicines.map(m => m.id == editId ? medObj : m);
+        } else {
+            medicines.push(medObj);
+        }
+
+        localStorage.setItem('deedose_items', JSON.stringify(medicines));
+        resetForm();
+        renderList();
+        renderCalendar();
+    }
+
+    function editMed(id) {
+        const item = medicines.find(m => m.id === id);
+        if(!item) return;
+        document.getElementById('editId').value = item.id;
+        document.getElementById('medName').value = item.name;
+        document.getElementById('medDose').value = item.dose;
+        document.getElementById('medAmount').value = item.amount;
+        document.getElementById('medCategory').value = item.category;
+        document.getElementById('medMeal').value = item.meal;
+        document.getElementById('startDate').value = item.start;
+        document.getElementById('endDate').value = item.end;
+        document.getElementById('medTime').value = item.time;
+
+        const everydayCheck = document.getElementById('everydayCheck');
+        if (everydayCheck) {
+            everydayCheck.checked = !!item.isEveryday || item.end === "2099-12-31";
+            toggleEverydayOption();
+        }
+
+        document.getElementById('formTitle').innerText = dict[currentLang].formEdit;
+        document.getElementById('btnSave').innerText = dict[currentLang].saveBtn;
+        document.getElementById('btnCancel').style.display = "block";
+    }
+
+    function deleteMed(id) {
+        if(confirm(currentLang === 'th' ? "ยืนยันการลบรายการนี้?" : "Are you sure you want to delete?")) {
+            medicines = medicines.filter(m => m.id !== id);
+            localStorage.setItem('deedose_items', JSON.stringify(medicines));
+            renderList();
+            renderCalendar();
+        }
+    }
+
+    function resetForm() {
+        document.getElementById('editId').value = "";
+        document.getElementById('medName').value = "";
+        document.getElementById('medDose').value = "";
+        document.getElementById('medAmount').value = "1";
+        document.getElementById('startDate').value = "";
+        document.getElementById('endDate').value = "";
+        document.getElementById('medTime').value = "";
+        const everydayCheck = document.getElementById('everydayCheck');
+        if (everydayCheck) {
+            everydayCheck.checked = false;
+            toggleEverydayOption();
+        }
+        document.getElementById('formTitle').innerText = dict[currentLang].formAdd;
+        document.getElementById('btnSave').innerText = dict[currentLang].saveBtn;
+        document.getElementById('btnCancel').style.display = "none";
+    }
+
+    function renderList() {
+        const container = document.getElementById('medicineList');
+        container.innerHTML = "";
+
+        if(medicines.length === 0) {
+            container.innerHTML = `<p style="text-align:center; color:#94a3b8; padding: 20px 0;">${currentLang === 'th' ? 'ไม่มีรายการยาในระบบ' : 'No medications found.'}</p>`;
+            return;
+        }
+
+        medicines.forEach(m => {
+            const durationText = (m.isEveryday || m.end === "2099-12-31") ? "🔄 ทานทุกวัน (ไม่มีวันสิ้นสุด)" : `📅 ${m.start} ถึง ${m.end}`;
+            container.innerHTML += `
+                <div class="med-card">
+                    <div class="med-info">
+                        <h4>${m.name} (${m.dose})</h4>
+                        <p><strong>รูปแบบ:</strong> ${m.category} | <strong>ทานครั้งละ:</strong> ${m.amount} เม็ด/ชิ้น</p>
+                        <p>📌 <strong>ช่วงเวลา:</strong> ${m.meal}</p>
+                        <p>${durationText} | ⏰ <strong>${m.time} น.</strong></p>
+                    </div>
+                    <div class="med-actions">
+                        <button class="btn-sm btn-edit" onclick="editMed(${m.id})">✏️</button>
+                        <button class="btn-sm btn-delete" onclick="deleteMed(${m.id})">🗑️</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function renderCalendar() {
+        const year = calDate.getFullYear();
+        const month = calDate.getMonth();
+       
+        document.getElementById('calMonthYear').innerText = calDate.toLocaleDateString(currentLang === 'th' ? 'th-TH' : 'en-US', { month: 'long', year: 'numeric' });
+
+        const daysNameContainer = document.getElementById('calDaysName');
+        daysNameContainer.innerHTML = dict[currentLang].days.map(d => `<div class="cal-day-name">${d}</div>`).join('');
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        const grid = document.getElementById('calGrid');
+        grid.innerHTML = "";
+
+        for(let i = 0; i < firstDay; i++) {
+            grid.innerHTML += `<div></div>`;
+        }
+
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        for(let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            const isToday = dateStr === todayStr ? 'today' : '';
+           
+            const hasMeds = medicines.some(m => dateStr >= m.start && dateStr <= m.end);
+            const hasLogs = logs[dateStr] && Object.keys(logs[dateStr]).length > 0;
+
+            grid.innerHTML += `
+                <div class="cal-date ${isToday}" onclick="openLogModal('${dateStr}')">
+                    <span>${d}</span>
+                    <div>${hasLogs ? '<span class="cal-dot"></span>' : (hasMeds ? '<span style="font-size:10px; color:#94a3b8;">💊</span>' : '')}</div>
+                </div>
+            `;
+        }
+    }
+
+    function changeMonth(offset) {
+        calDate.setMonth(calDate.getMonth() + offset);
+        renderCalendar();
+    }
+
+    function openLogModal(dateStr) {
+        document.getElementById('logDateTitle').innerText = `📅 ${dateStr}`;
+        const content = document.getElementById('logContent');
+        content.innerHTML = "";
+
+        const scheduledMeds = medicines.filter(m => dateStr >= m.start && dateStr <= m.end);
+
+        if(scheduledMeds.length === 0) {
+            content.innerHTML = `<p style="color:#64748b; text-align:center;">${currentLang === 'th' ? 'ไม่มีรายการยาที่ต้องทานในวันนี้' : 'No scheduled medicines for this date.'}</p>`;
+        } else {
+            scheduledMeds.forEach(m => {
+                const isTaken = logs[dateStr] && logs[dateStr][m.id];
+                content.innerHTML += `
+                    <div style="margin-bottom:10px; padding:10px; border:1px solid var(--border); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong>${m.name}</strong> (${m.dose})<br>
+                            <small>${m.amount} เม็ด/ชิ้น [${m.meal}] - ⏰ ${m.time} น.</small>
+                        </div>
+                        <input type="checkbox" ${isTaken ? 'checked' : ''} onchange="toggleMedLog('${dateStr}', ${m.id}, this.checked)" style="width:20px; height:20px; cursor:pointer;">
+                    </div>
+                `;
+            });
+        }
+
+        document.getElementById('logModal').style.display = "flex";
+    }
+
+    function toggleMedLog(dateStr, medId, isChecked) {
+        if(!logs[dateStr]) logs[dateStr] = {};
+        if(isChecked) {
+            logs[dateStr][medId] = true;
+        } else {
+            delete logs[dateStr][medId];
+        }
+        localStorage.setItem('deedose_logs', JSON.stringify(logs));
+        renderCalendar();
+    }
+
+    function closeLogModal() {
+        document.getElementById('logModal').style.display = "none";
+    }
+
+    // 🔊 ระบบสังเคราะห์เสียงสัตว์เลี้ยงตามตัวเลือกผู้ใช้
+    function playPetSound() {
+        try {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+           
+            const pet = profile.pet || '🐱';
+            const now = audioCtx.currentTime;
+
+            if (pet === '🐱') {
+                // 🐱 เสียงแมวเมี๊ยว (Meow)
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(420, now);
+                osc.frequency.exponentialRampToValueAtTime(780, now + 0.25);
+                osc.frequency.exponentialRampToValueAtTime(360, now + 0.65);
+               
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.4, now + 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.65);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.65);
+
+            } else if (pet === '🐶') {
+                // 🐶 เสียงหมาเห่า (Bark)
+                [0, 0.18].forEach(delay => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = "sawtooth";
+                    osc.frequency.setValueAtTime(170, now + delay);
+                    osc.frequency.exponentialRampToValueAtTime(75, now + delay + 0.11);
+
+                    gain.gain.setValueAtTime(0.5, now + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.11);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + delay);
+                    osc.stop(now + delay + 0.11);
+                });
+
+            } else if (pet === '🐦' || pet === '🐤') {
+                // 🐦 เสียงนกร้องจิ๊บๆ (Chirp)
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(2200, now);
+                osc.frequency.linearRampToValueAtTime(3200, now + 0.08);
+                osc.frequency.linearRampToValueAtTime(1900, now + 0.16);
+
+                gain.gain.setValueAtTime(0.35, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.16);
+
+            } else if (pet === '🐷') {
+                // 🐷 เสียงหมู (Oink)
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = "sawtooth";
+                osc.frequency.setValueAtTime(120, now);
+                osc.frequency.linearRampToValueAtTime(90, now + 0.2);
+
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.2);
+
+            } else {
+                // เสียงเตือนทั่วไป
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(900, now + 0.2);
+
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            }
+
+            if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
+        } catch(e) {
+            console.log("Audio play error: ", e);
+        }
+    }
+
+    function triggerAlarm(med) {
+        activeAlarmMed = med;
+        document.getElementById('alarmDetails').innerText = `💊 ยา: ${med.name} (${med.dose})\n📌 จำนวน: ${med.amount} เม็ด/ชิ้น [${med.meal}]\n⏰ เวลา: ${med.time} น.`;
+        document.getElementById('alarmModal').style.display = "flex";
+
+        // แสดง Pop-up Notification นอกหน้าเว็บ
+        showSystemNotification(
+            `🚨 Dee - Dose ได้เวลาทานยาแล้ว! (${profile.pet || '🐱'})`,
+            `ยา: ${med.name} (${med.dose}) - ทาน ${med.amount} เม็ด [${med.meal}]`
+        );
+
+        if(!alarmInterval) {
+            playPetSound();
+            alarmInterval = setInterval(() => { playPetSound(); }, 1200);
+        }
+    }
+
+    function stopAlarm() {
+        document.getElementById('alarmModal').style.display = "none";
+        if(alarmInterval) {
+            clearInterval(alarmInterval);
+            alarmInterval = null;
+        }
+
+        if(activeAlarmMed) {
+            const todayStr = new Date().toISOString().split('T')[0];
+            toggleMedLog(todayStr, activeAlarmMed.id, true);
+            activeAlarmMed = null;
+        }
+    }
+
+    // ตรวจสอบเวลาเตือนทานยา
+    setInterval(() => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const todayStr = `${year}-${month}-${day}`;
+       
+        const hours = String(now.getHours()).padStart(2, '0');
+        const mins = String(now.getMinutes()).padStart(2, '0');
+        const secs = String(now.getSeconds()).padStart(2, '0');
+        const timeStr = `${hours}:${mins}`;
+
+        if(secs === "00") {
+            medicines.forEach(m => {
+                if(todayStr >= m.start && todayStr <= m.end && m.time === timeStr) {
+                    triggerAlarm(m);
+                }
+            });
+        }
+    }, 1000);
+
+    trackUserAccess();
+    renderRecommendations();
+    renderList();
+    renderCalendar();
 </script>
-
