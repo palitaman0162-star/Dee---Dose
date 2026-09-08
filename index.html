@@ -244,7 +244,7 @@
             </div>
         </div>
         <button id="btnNotifPerm" onclick="requestNotificationPermission()" style="margin-top: 10px; width: 100%; background: #059669;">🔔 เปิดระบบการแจ้งเตือนเตือนบนหน้าจอล็อก</button>
-        <button id="btnTestSound" onclick="testAlarmSound()" style="margin-top: 8px; width: 100%; background: #eab308; color: black;">⏰ ทดสอบฟังเสียงแจ้งเตือนแบบนาฬิกาปลุก</button>
+        <button id="btnTestSound" onclick="testAlarmSound()" style="margin-top: 8px; width: 100%; background: #eab308; color: black;">⏰ ทดสอบฟังเสียงแจ้งเตือนมาตรฐาน</button>
     </div>
 
     <!-- Pet Companion Widget -->
@@ -399,13 +399,12 @@
     let activeAlarmMed = null;
     let calDate = new Date();
 
-    // ข้อมูลคู่หูสัตว์เลี้ยงทั้ง 4 ตัว
+    // ข้อมูลคู่หูสัตว์เลี้ยงสำหรับแสดงข้อความทักทาย
     const petData = {
         cat: {
             icon: '🐱',
             nameTH: 'น้องม้าวน้อย',
             nameEN: 'Kitty',
-            sound: 'เหมียว~',
             greetings: {
                 th: {
                     morning: 'อรุณสวัสดิ์ครับเหมียว! อย่าลืมทานยาเช้านะครับ',
@@ -429,7 +428,6 @@
             icon: '🐶',
             nameTH: 'โฮ่งน้อยจอมขยัน',
             nameEN: 'Puppy',
-            sound: 'โฮ่ง~',
             greetings: {
                 th: {
                     morning: 'โฮ่ง! อรุณสวัสดิ์ครับ! พร้อมช่วยเตือนยาเช้าแล้วครับ!',
@@ -453,7 +451,6 @@
             icon: '🐷',
             nameTH: 'น้องหมูอู๊ดอู๊ด',
             nameEN: 'Piggy',
-            sound: 'อู๊ด~',
             greetings: {
                 th: {
                     morning: 'อู๊ดๆ~ เช้าแล้วครับ ทานอาหารเช้าเสร็จแล้วตามด้วยยานะครับ',
@@ -477,7 +474,6 @@
             icon: '🐦',
             nameTH: 'เจ้านกน้อยจิ๊บจิ๊บ',
             nameEN: 'Birdy',
-            sound: 'จิ๊บ~',
             greetings: {
                 th: {
                     morning: 'จิ๊บๆ! อรุณสวัสดิ์ครับ! บินมาเตือนให้ทานยาเช้าแล้วนะ',
@@ -652,7 +648,7 @@
             genderMale: "ชาย", genderFemale: "หญิง",
             ageChild: "เด็ก", ageAdult: "ผู้ใหญ่", ageElder: "ผู้สูงอายุ",
             btnNotifPerm: "🔔 เปิดระบบการแจ้งเตือนเตือนบนหน้าจอล็อก",
-            btnTestSound: "⏰ ทดสอบฟังเสียงแจ้งเตือนแบบนาฬิกาปลุก",
+            btnTestSound: "⏰ ทดสอบฟังเสียงแจ้งเตือนมาตรฐาน",
             recHeader: "💡 ยาสามัญประจำบ้านแนะนำ (กดปุ่มเพื่อกรอกด่วน)",
             recSub: "เลือกยาพื้นฐานที่ต้องการ ระบบจะช่วยกรอกข้อมูลอัตโนมัติทันทีโดยไม่ต้องพิมพ์เอง",
             presetBadge: "ยาสามัญ",
@@ -691,7 +687,7 @@
             genderMale: "Male", genderFemale: "Female",
             ageChild: "Child", ageAdult: "Adult", ageElder: "Elderly",
             btnNotifPerm: "🔔 Enable Lockscreen Notifications",
-            btnTestSound: "⏰ Test Clock Alarm Sound",
+            btnTestSound: "⏰ Test Standard Alarm Sound",
             recHeader: "💡 Essential Home Medicines (Quick Auto-Fill)",
             recSub: "Select essential medicines to auto-fill details without typing.",
             presetBadge: "Essential",
@@ -1161,7 +1157,7 @@
         document.getElementById('logModal').style.display = "none";
     }
 
-    // เสียงนาฬิกาปลุกแบบนุ่มนวล ฟังแล้วไม่ตกใจ
+    // เสียงนาฬิกาปลุกดนตรีมาตรฐาน นุ่มนวล ไม่น่ากลัว (Soft Chime)
     function playAlarmTone() {
         try {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1169,8 +1165,8 @@
            
             const now = audioCtx.currentTime;
             
-            // โทนเสียงดนตรีเตือนแบบนาฬิกาปลุกทั่วไป (Soft Chime Duo)
-            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            // โน้ตเสียงแจ้งเตือนสไตล์นาฬิกาปลุกสากล (C5, E5, G5, C6)
+            const notes = [523.25, 659.25, 783.99, 1046.50]; 
             notes.forEach((freq, idx) => {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
@@ -1222,7 +1218,7 @@
         }
     }
 
-    // ทดสอบฟังเสียงนาฬิกาปลุก
+    // ทดสอบฟังเสียงนาฬิกาปลุกมาตรฐาน
     function testAlarmSound() {
         unlockAudio();
         triggerAlarm({
