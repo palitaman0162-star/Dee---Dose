@@ -170,13 +170,14 @@
                 <label>คู่หูสัตว์เลี้ยง</label>
                 <select id="petSelect" onchange="updatePet()">
                     <option value="🐱">🐱 แมว (เหมียว~)</option>
-                    <option value="🐶">🐶 สุนัข (โฮ่ง!)</option>
+                    <option value="🐶">🐶 สุนัข (โฮ่งๆ หอนดัง!)</option>
                     <option value="🐦">🐦 นก (จิ๊บๆ~)</option>
                     <option value="🐷">🐷 หมู (อู๊ดๆ~)</option>
                 </select>
             </div>
         </div>
         <button onclick="requestNotificationPermission()" style="margin-top: 10px; width: 100%; background: #059669;">🔔 เปิดระบบ Pop-up เตือนบนหน้าจอล็อก (System Notification)</button>
+        <button onclick="testAlarmSound()" style="margin-top: 8px; width: 100%; background: #eab308; color: black;">🔊 ทดสอบฟังเสียงแจ้งเตือนสัตว์เลี้ยง</button>
     </div>
 
     <!-- Quick Presets / Recommendations -->
@@ -299,7 +300,7 @@
         <h2 id="t-alarmTitle" style="color: #dc2626; margin: 10px 0;">🚨 ได้เวลาทานยาแล้ว!</h2>
         <p id="petTalk" style="color: #475569;">อย่าลืมทานยาให้ตรงเวลานะครับ!</p>
         <div id="alarmDetails" style="background: #f1f5f9; padding: 10px; border-radius: 8px; margin: 15px 0; text-align: left; font-size: 14px; white-space: pre-line;"></div>
-        <button onclick="stopAlarm()" style="width:100%; background: #22c55e; font-size: 16px; padding: 12px;">✅ ทานยาเรียบร้อยแล้ว</button>
+        <button onclick="stopAlarm()" style="width:100%; background: #22c55e; font-size: 16px; padding: 12px;">✅ ทานยาเรียบร้อยแล้ว (ปิดเสียงเตือน)</button>
     </div>
 </div>
 
@@ -362,7 +363,6 @@
         });
     }
 
-    // รายการยาสามัญประจำบ้านพร้อมสรรพคุณ และข้อมูลสำหรับตั้งค่าด่วน
     const recommendedMeds = [
         {
             name: "พาราสีตามอล (Paracetamol)",
@@ -483,7 +483,7 @@
                 icon: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
                 badge: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
                 requireInteraction: true,
-                vibrate: [300, 150, 300],
+                vibrate: [300, 150, 300, 150, 500],
                 tag: 'dee-dose-alarm',
                 renotify: true
             };
@@ -543,7 +543,6 @@
         renderCalendar();
     }
 
-    // แสดงการ์ดยาแนะนำพร้อมปุ่มกรอกอัตโนมัติ
     function renderRecommendations() {
         const container = document.getElementById('recommendedContainer');
         container.innerHTML = "";
@@ -566,7 +565,6 @@
         });
     }
 
-    // ฟังก์ชันเพิ่มยาเข้าตารางทันทีโดยไม่ต้องผ่านฟอร์ม
     function quickAddPreset(idx) {
         unlockAudio();
         const rec = recommendedMeds[idx];
@@ -592,7 +590,6 @@
         alert(`เพิ่มรายการ "${rec.name}" เข้าตารางเตือนทานยาเรียบร้อยแล้ว!`);
     }
 
-    // ฟังก์ชันดึงข้อมูลยาลงฟอร์มให้อัตโนมัติ เพื่อให้ผู้ใช้ปรับแต่งเวลาเพิ่มเติม
     function useRecommendation(idx) {
         const rec = recommendedMeds[idx];
         const todayStr = new Date().toISOString().split('T')[0];
@@ -824,6 +821,7 @@
         document.getElementById('logModal').style.display = "none";
     }
 
+    // ฟังก์ชันสร้างเสียงสัตว์แบบยาว ชัดเจน และดังต่อเนื่องกังวาน
     function playPetSound() {
         try {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -833,93 +831,102 @@
             const now = audioCtx.currentTime;
 
             if (pet === '🐱') {
+                // เสียงแมวร้องเหมียวยาวขึ้น เสียงสูงกังวานชัดเจน
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 
                 osc.type = "sine";
-                osc.frequency.setValueAtTime(550, now);
-                osc.frequency.exponentialRampToValueAtTime(850, now + 0.2);
-                osc.frequency.exponentialRampToValueAtTime(400, now + 0.8);
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(1000, now + 0.3);
+                osc.frequency.exponentialRampToValueAtTime(450, now + 1.1);
 
                 gain.gain.setValueAtTime(0.01, now);
-                gain.gain.linearRampToValueAtTime(0.25, now + 0.15);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                gain.gain.linearRampToValueAtTime(0.5, now + 0.2);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 1.1);
 
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start(now);
-                osc.stop(now + 0.8);
+                osc.stop(now + 1.1);
 
             } else if (pet === '🐶') {
-                [0, 0.25].forEach(delay => {
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    
-                    osc.type = "triangle";
-                    osc.frequency.setValueAtTime(220, now + delay);
-                    osc.frequency.exponentialRampToValueAtTime(110, now + delay + 0.15);
+                // เสียงหมาหอนยาว เสียงทุ้มกังวานแบบชัดเจนมากๆ (Howl)
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = "sawtooth";
+                osc.frequency.setValueAtTime(250, now);
+                osc.frequency.linearRampToValueAtTime(550, now + 0.4);
+                osc.frequency.linearRampToValueAtTime(300, now + 1.2);
 
-                    gain.gain.setValueAtTime(0.01, now + delay);
-                    gain.gain.linearRampToValueAtTime(0.3, now + delay + 0.03);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.15);
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = "lowpass";
+                filter.frequency.setValueAtTime(800, now);
 
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start(now + delay);
-                    osc.stop(now + delay + 0.15);
-                });
+                gain.gain.setValueAtTime(0.01, now);
+                gain.gain.linearRampToValueAtTime(0.6, now + 0.3);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 1.2);
 
             } else if (pet === '🐦') {
-                [0, 0.12, 0.24].forEach((delay, index) => {
+                // เสียงนกร้องสั้นๆ ติดต่อกัน 4 ครั้งให้ก้องกังวาน
+                [0, 0.15, 0.3, 0.45].forEach((delay, index) => {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
                     
                     osc.type = "sine";
-                    const startFreq = 2200 + (index * 200);
+                    const startFreq = 2500 + (index * 150);
                     osc.frequency.setValueAtTime(startFreq, now + delay);
-                    osc.frequency.linearRampToValueAtTime(startFreq + 600, now + delay + 0.06);
+                    osc.frequency.linearRampToValueAtTime(startFreq + 700, now + delay + 0.08);
 
                     gain.gain.setValueAtTime(0.01, now + delay);
-                    gain.gain.linearRampToValueAtTime(0.18, now + delay + 0.02);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.08);
+                    gain.gain.linearRampToValueAtTime(0.4, now + delay + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.1);
 
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
                     osc.start(now + delay);
-                    osc.stop(now + delay + 0.08);
+                    osc.stop(now + delay + 0.1);
                 });
 
             } else if (pet === '🐷') {
-                [0, 0.3].forEach(delay => {
+                // เสียงหมูร้องกวนๆ ดังชัดเจน
+                [0, 0.35].forEach(delay => {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
                     
                     osc.type = "sawtooth";
-                    osc.frequency.setValueAtTime(130, now + delay);
-                    osc.frequency.linearRampToValueAtTime(95, now + delay + 0.22);
+                    osc.frequency.setValueAtTime(160, now + delay);
+                    osc.frequency.linearRampToValueAtTime(110, now + delay + 0.28);
 
                     const filter = audioCtx.createBiquadFilter();
                     filter.type = "lowpass";
-                    filter.frequency.setValueAtTime(400, now + delay);
+                    filter.frequency.setValueAtTime(500, now + delay);
 
                     gain.gain.setValueAtTime(0.01, now + delay);
-                    gain.gain.linearRampToValueAtTime(0.2, now + delay + 0.05);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.22);
+                    gain.gain.linearRampToValueAtTime(0.5, now + delay + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.28);
 
                     osc.connect(filter);
                     filter.connect(gain);
                     gain.connect(audioCtx.destination);
                     osc.start(now + delay);
-                    osc.stop(now + delay + 0.22);
+                    osc.stop(now + delay + 0.28);
                 });
             }
 
-            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+            if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
         } catch(e) {
             console.log("Audio Error: ", e);
         }
     }
 
+    // ฟังก์ชันเริ่มส่งเสียงเตือนวนลูปต่อเนื่องแบบไม่หยุด
     function triggerAlarm(med) {
         activeAlarmMed = med;
         document.getElementById('alarmDetails').innerText = `💊 ยา: ${med.name} (${med.dose})\n📌 จำนวน: ${med.amount} เม็ด/ชิ้น [${med.meal}]\n⏰ เวลา: ${med.time} น.`;
@@ -930,12 +937,28 @@
             `ถึงเวลาทานยา: ${med.name} (${med.dose}) - ${med.amount} เม็ด [${med.meal}]`
         );
 
+        // วนลูปเล่นเสียงทุกๆ 1.2 วินาทีอย่างต่อเนื่อง
         if(!alarmInterval) {
             playPetSound();
-            alarmInterval = setInterval(() => { playPetSound(); }, 2500);
+            alarmInterval = setInterval(() => { 
+                playPetSound(); 
+            }, 1200);
         }
     }
 
+    // ฟังก์ชันทดสอบฟังเสียงแจ้งเตือนสัตว์เลี้ยง
+    function testAlarmSound() {
+        unlockAudio();
+        triggerAlarm({
+            name: "พาราสีตามอล (ตัวอย่างทดสอบ)",
+            dose: "500 mg",
+            amount: "1",
+            meal: "หลังอาหาร",
+            time: "12:00"
+        });
+    }
+
+    // หยุดเสียงและหยุดวนลูปเมื่อกดปุ่มรับทราบ
     function stopAlarm() {
         document.getElementById('alarmModal').style.display = "none";
         if(alarmInterval) {
