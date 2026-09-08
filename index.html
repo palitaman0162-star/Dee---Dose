@@ -534,21 +534,24 @@
     window.addEventListener('click', unlockAudio, { once: true });
     window.addEventListener('touchstart', unlockAudio, { once: true });
 
-    // เสียงแจ้งเตือนมาตรฐาน ดนตรีติ๊ด-ดิ่ง
+    // เสียงแจ้งเตือนปรับระดับความดังสูงสุดและใช้รูปคลื่นสี่เหลี่ยมเพื่อให้ได้ยินชัดเจน
     function playAlarmTone() {
         try {
             unlockAudio();
             const now = audioCtx.currentTime;
-            const notes = [523.25, 659.25, 783.99, 1046.50]; 
+            // เพิ่มความถี่โน้ตเสียงให้สูงขึ้นเพื่อความแหลมสะดุดตา
+            const notes = [659.25, 880.00, 1046.50, 1318.51]; 
             notes.forEach((freq, idx) => {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
 
-                osc.type = "sine";
+                // เปลี่ยนรูปคลื่นเสียงเป็น 'square' เพื่อเสียงที่แหลมและดังกว่าเดิม
+                osc.type = "square"; 
                 osc.frequency.setValueAtTime(freq, now + (idx * 0.12));
 
                 gain.gain.setValueAtTime(0.01, now + (idx * 0.12));
-                gain.gain.linearRampToValueAtTime(0.3, now + (idx * 0.12) + 0.03);
+                // ปรับระดับความดังพุ่งขึ้นไปที่ 1.0 (ระดับสูงสุดของ Web Audio API)
+                gain.gain.linearRampToValueAtTime(1.0, now + (idx * 0.12) + 0.03);
                 gain.gain.exponentialRampToValueAtTime(0.001, now + (idx * 0.12) + 0.35);
 
                 osc.connect(gain);
