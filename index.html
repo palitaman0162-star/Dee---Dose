@@ -38,6 +38,82 @@
             border: 1px solid var(--border);
         }
 
+        /* Styles สำหรับการ์ดคู่หูสัตว์เลี้ยง */
+        .pet-card {
+            background: linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%);
+            border: 2px solid #bfdbfe;
+            border-radius: 16px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+        }
+
+        .pet-avatar {
+            font-size: 50px;
+            background: white;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .pet-dialogue {
+            flex: 1;
+        }
+
+        .pet-name-tag {
+            font-size: 12px;
+            font-weight: bold;
+            color: #1d4ed8;
+            background: #dbeafe;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+
+        .pet-speech-bubble {
+            font-size: 14px;
+            color: #1e293b;
+            font-weight: 500;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .pet-selector {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .pet-btn {
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pet-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
         .form-group {
             margin-bottom: 12px;
             display: flex;
@@ -171,6 +247,21 @@
         <button id="btnTestSound" onclick="testAlarmSound()" style="margin-top: 8px; width: 100%; background: #eab308; color: black;">⏰ ทดสอบฟังเสียงแจ้งเตือนแบบนาฬิกาปลุก</button>
     </div>
 
+    <!-- Pet Companion Widget -->
+    <div class="pet-card">
+        <div class="pet-avatar" id="petAvatar">🐱</div>
+        <div class="pet-dialogue">
+            <span class="pet-name-tag" id="petNameTag">🐾 คู่หูเตือนทานยา: น้องม้าวน้อย</span>
+            <p class="pet-speech-bubble" id="petSpeech">สวัสดีครับ! วันนี้ผมจะช่วยเตือนให้ทานยาตรงเวลานะครับ เหมียว~</p>
+            <div class="pet-selector">
+                <button class="pet-btn active" id="btn-pet-cat" onclick="selectPet('cat')">🐱 แมว</button>
+                <button class="pet-btn" id="btn-pet-dog" onclick="selectPet('dog')">🐶 หมา</button>
+                <button class="pet-btn" id="btn-pet-pig" onclick="selectPet('pig')">🐷 หมู</button>
+                <button class="pet-btn" id="btn-pet-bird" onclick="selectPet('bird')">🐦 นก</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Quick Presets / Recommendations -->
     <div class="card">
         <h3 id="t-recHeader">💡 ยาสามัญประจำบ้านแนะนำ (กดปุ่มเพื่อกรอกด่วน)</h3>
@@ -287,7 +378,7 @@
 <!-- Modal สัญญาณเตือนเมื่อถึงเวลา -->
 <div id="alarmModal" class="modal">
     <div class="modal-content" style="text-align: center;">
-        <span style="font-size: 60px;">⏰</span>
+        <span style="font-size: 60px;" id="alarmPetIcon">⏰</span>
         <h2 id="t-alarmTitle" style="color: #dc2626; margin: 10px 0;">⏰ ได้เวลาทานยาแล้ว!</h2>
         <p id="t-alarmSub" style="color: #475569;">กรุณาทานยาตามเวลาที่กำหนด</p>
         <div id="alarmDetails" style="background: #f1f5f9; padding: 10px; border-radius: 8px; margin: 15px 0; text-align: left; font-size: 14px; white-space: pre-line;"></div>
@@ -300,12 +391,155 @@
     let medicines = JSON.parse(localStorage.getItem('deedose_items')) || [];
     let logs = JSON.parse(localStorage.getItem('deedose_logs')) || {};
     let profile = JSON.parse(localStorage.getItem('deedose_profile')) || { gender: 'male', age: 'adult' };
+    let selectedPetType = localStorage.getItem('deedose_pet') || 'cat';
    
     let currentLang = 'th';
     let alarmInterval = null;
     let audioCtx = null;
     let activeAlarmMed = null;
     let calDate = new Date();
+
+    // ข้อมูลคู่หูสัตว์เลี้ยงทั้ง 4 ตัว
+    const petData = {
+        cat: {
+            icon: '🐱',
+            nameTH: 'น้องม้าวน้อย',
+            nameEN: 'Kitty',
+            sound: 'เหมียว~',
+            greetings: {
+                th: {
+                    morning: 'อรุณสวัสดิ์ครับเหมียว! อย่าลืมทานยาเช้านะครับ',
+                    afternoon: 'ทานข้าวเที่ยงแล้ว ยาหลังอาหารรออยู่ครับเหมียว',
+                    evening: 'มื้อเย็นแล้วน้า อย่าลืมดูแลสุขภาพด้วยครับเหมียว',
+                    night: 'ดึกแล้ว ทานยาก่อนนอนแล้วรีบพักผ่อนนะครับเหมียว',
+                    alarm: 'เหมียว! ได้เวลาทานยาแล้วครับ ห้ามลืมเด็ดขาดนะ!',
+                    done: 'เก่งมากครับเหมียว! ทานยาเรียบร้อย สุขภาพแข็งแรงแน่นอน~'
+                },
+                en: {
+                    morning: 'Good morning meow! Don\'t forget your morning dose.',
+                    afternoon: 'Afternoon! Remember your post-meal meds meow.',
+                    evening: 'Evening time! Take care of your health meow.',
+                    night: 'Night time! Take bedtime meds and sleep well meow.',
+                    alarm: 'Meow! Time to take your medicine right now!',
+                    done: 'Great job meow! Stay healthy and strong~'
+                }
+            }
+        },
+        dog: {
+            icon: '🐶',
+            nameTH: 'โฮ่งน้อยจอมขยัน',
+            nameEN: 'Puppy',
+            sound: 'โฮ่ง~',
+            greetings: {
+                th: {
+                    morning: 'โฮ่ง! อรุณสวัสดิ์ครับ! พร้อมช่วยเตือนยาเช้าแล้วครับ!',
+                    afternoon: 'เที่ยงแล้วโฮ่ง! อย่าลืมทานยาหลังอาหารนะครับ!',
+                    evening: 'โฮ่ง! ตอนเย็นแล้ว ทานยาให้ครบตรงเวลานะครับ!',
+                    night: 'โฮ่ง! ก่อนนอนคืนนี้อย่าลืมทานยา แล้วนอนหลับฝันดีครับ!',
+                    alarm: 'โฮ่งๆ! ถึงเวลาทานยาแล้วครับ! รีบมาทานเร็วเข้า!',
+                    done: 'โฮ่ง! สุดยอดเลยครับ! ทานยาตรงเวลาแบบนี้เยี่ยมที่สุด!'
+                },
+                en: {
+                    morning: 'Woof! Good morning! Ready to help with your morning dose!',
+                    afternoon: 'Woof! Lunch time! Take your medicines after meals!',
+                    evening: 'Woof! Evening is here, stay on track with your meds!',
+                    night: 'Woof! Night time dose before bed, sweet dreams!',
+                    alarm: 'Woof woof! Medicine time! Hurry up!',
+                    done: 'Woof! Awesome job! Perfect timing as always!'
+                }
+            }
+        },
+        pig: {
+            icon: '🐷',
+            nameTH: 'น้องหมูอู๊ดอู๊ด',
+            nameEN: 'Piggy',
+            sound: 'อู๊ด~',
+            greetings: {
+                th: {
+                    morning: 'อู๊ดๆ~ เช้าแล้วครับ ทานอาหารเช้าเสร็จแล้วตามด้วยยานะครับ',
+                    afternoon: 'อู๊ด! ทานมื้อเที่ยงอิ่มแล้ว อย่าลืมทานยาด้วยน้า',
+                    evening: 'อู๊ดๆ มื้อเย็นแสนอร่อย ทานยาตามเวลาด้วยครับ',
+                    night: 'อู๊ด~ ง่วงแล้ว ทานยาก่อนนอนแล้วไปนอนพร้อมกันนะ',
+                    alarm: 'อู๊ด! ได้เวลาทานยาแล้วอู๊ด! อย่าลืมเด็ดขาดน้า!',
+                    done: 'อู๊ดๆ! เก่งจังเลย ทานยาเรียบร้อยแล้ว เย้ๆ~'
+                },
+                en: {
+                    morning: 'Oink oink~ Morning! Take your meds after breakfast.',
+                    afternoon: 'Oink! Full after lunch? Don\'t forget your medicine!',
+                    evening: 'Oink oink! Delicious dinner, take your scheduled meds!',
+                    night: 'Oink~ Sleepy time! Take bedtime meds and sleep well.',
+                    alarm: 'Oink! Time to take your medicine now!',
+                    done: 'Oink oink! Yay! You took your medicine properly~'
+                }
+            }
+        },
+        bird: {
+            icon: '🐦',
+            nameTH: 'เจ้านกน้อยจิ๊บจิ๊บ',
+            nameEN: 'Birdy',
+            sound: 'จิ๊บ~',
+            greetings: {
+                th: {
+                    morning: 'จิ๊บๆ! อรุณสวัสดิ์ครับ! บินมาเตือนให้ทานยาเช้าแล้วนะ',
+                    afternoon: 'จิ๊บๆ เที่ยงวันแล้ว ทานยาตามเวลาเพื่อสุขภาพที่ดีครับ',
+                    evening: 'จิ๊บๆ ตอนเย็นแล้ว รักษาสุขภาพและทานยาด้วยนะครับ',
+                    night: 'จิ๊บ~ ดึกแล้ว เข้านอนพร้อมทานยาก่อนนอนนะครับ',
+                    alarm: 'จิ๊บๆๆ! เวลาทานยามาถึงแล้ว! บินมาเตือนด่วนเลย!',
+                    done: 'จิ๊บๆ! เยี่ยมยอดมากครับ! ทานยาตรงเวลาแข็งแรงๆ นะ!'
+                },
+                en: {
+                    morning: 'Chirp chirp! Good morning! Flying in to remind your dose!',
+                    afternoon: 'Chirp chirp! Afternoon dose time for good health!',
+                    evening: 'Chirp chirp! Evening time, keep up with your medicines!',
+                    night: 'Chirp~ Night time, take bedtime meds before sleep.',
+                    alarm: 'Chirp chirp! Medicine time is here! Urgent reminder!',
+                    done: 'Chirp chirp! Bravo! Taking medicine on time keeps you strong!'
+                }
+            }
+        }
+    };
+
+    function selectPet(petType) {
+        selectedPetType = petType;
+        localStorage.setItem('deedose_pet', petType);
+        
+        ['cat', 'dog', 'pig', 'bird'].forEach(p => {
+            const btn = document.getElementById(`btn-pet-${p}`);
+            if (btn) {
+                if (p === petType) btn.classList.add('active');
+                else btn.classList.remove('active');
+            }
+        });
+
+        updatePetDisplay();
+    }
+
+    function updatePetDisplay(customStatus = null) {
+        const pet = petData[selectedPetType] || petData.cat;
+        const avatarEl = document.getElementById('petAvatar');
+        const nameTagEl = document.getElementById('petNameTag');
+        const speechEl = document.getElementById('petSpeech');
+
+        if (!avatarEl || !speechEl) return;
+
+        avatarEl.innerText = pet.icon;
+        
+        const petName = currentLang === 'th' ? pet.nameTH : pet.nameEN;
+        nameTagEl.innerText = `🐾 ${currentLang === 'th' ? 'คู่หูเตือนทานยา' : 'Med Companion'}: ${petName}`;
+
+        if (customStatus && pet.greetings[currentLang][customStatus]) {
+            speechEl.innerText = pet.greetings[currentLang][customStatus];
+            return;
+        }
+
+        const hour = new Date().getHours();
+        let timeKey = 'morning';
+        if (hour >= 11 && hour < 16) timeKey = 'afternoon';
+        else if (hour >= 16 && hour < 21) timeKey = 'evening';
+        else if (hour >= 21 || hour < 5) timeKey = 'night';
+
+        speechEl.innerText = pet.greetings[currentLang][timeKey];
+    }
 
     function unlockAudio() {
         if (!audioCtx) {
@@ -624,6 +858,7 @@
             document.getElementById('btnSave').innerText = t.saveBtn;
         }
 
+        updatePetDisplay();
         renderRecommendations();
         renderList();
         renderCalendar();
@@ -963,11 +1198,15 @@
     // ฟังก์ชันเริ่มส่งเสียงเตือนวนลูปต่อเนื่องแบบไม่หยุดจนกว่าผู้ใช้จะกดปิด
     function triggerAlarm(med) {
         activeAlarmMed = med;
+        const pet = petData[selectedPetType] || petData.cat;
         const medName = currentLang === 'th' ? (med.nameTH || med.nameEN) : (med.nameEN || med.nameTH);
         const mealText = getMealText(med.mealKey || 'afterMeal', currentLang);
 
+        document.getElementById('alarmPetIcon').innerText = pet.icon;
         document.getElementById('alarmDetails').innerText = `💊 ${currentLang==='th'?'ยา:':'Medicine:'} ${medName} (${med.dose})\n📌 ${currentLang==='th'?'จำนวน:':'Amount:'} ${med.amount} [${mealText}]\n⏰ ${currentLang==='th'?'เวลา:':'Time:'} ${med.time} ${currentLang==='th'?'น.':''}`;
         document.getElementById('alarmModal').style.display = "flex";
+
+        updatePetDisplay('alarm');
 
         showSystemNotification(
             `⏰ Dee - Dose: ${dict[currentLang].alarmTitle}`,
@@ -1009,6 +1248,8 @@
             toggleMedLog(todayStr, activeAlarmMed.id, true);
             activeAlarmMed = null;
         }
+
+        updatePetDisplay('done');
     }
 
     // ตรวจสอบเวลาทุกๆ 1 วินาที
@@ -1033,6 +1274,7 @@
         }
     }, 1000);
 
+    selectPet(selectedPetType);
     trackUserAccess();
     renderRecommendations();
     renderList();
