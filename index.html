@@ -124,6 +124,15 @@
             max-width: 400px;
             width: 90%;
         }
+
+        .preset-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -160,22 +169,20 @@
             <div class="form-group" style="flex:1;">
                 <label>คู่หูสัตว์เลี้ยง</label>
                 <select id="petSelect" onchange="updatePet()">
-                    <option value="🐱">🐱 แมว (Meow)</option>
-                    <option value="🐶">🐶 สุนัข (Bark)</option>
-                    <option value="🐦">🐦 นก (Chirp)</option>
-                    <option value="🐷">🐷 หมู (Oink-Oink)</option>
+                    <option value="🐱">🐱 แมว (เหมียว~)</option>
+                    <option value="🐶">🐶 สุนัข (โฮ่ง!)</option>
+                    <option value="🐦">🐦 นก (จิ๊บๆ~)</option>
+                    <option value="🐷">🐷 หมู (อู๊ดๆ~)</option>
                 </select>
             </div>
         </div>
-        <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button onclick="testPetSound()" style="flex: 1; background: #eab308; color: #0f172a;">🔊 ทดสอบเสียงสัตว์เลี้ยงที่เลือก</button>
-            <button onclick="requestNotificationPermission()" style="flex: 1.5; background: #059669;">🔔 เปิดการแจ้งเตือนนอกหน้าเว็บ</button>
-        </div>
+        <button onclick="requestNotificationPermission()" style="margin-top: 10px; width: 100%; background: #059669;">🔔 เปิดระบบ Pop-up เตือนบนหน้าจอล็อก (System Notification)</button>
     </div>
 
     <!-- Quick Presets / Recommendations -->
     <div class="card">
-        <h3 id="t-recHeader">💡 ยาน่ารู้ & กดบันทึกด่วน (Quick Presets)</h3>
+        <h3 id="t-recHeader">💡 ยาสามัญประจำบ้านแนะนำ (กดปุ่มเพื่อกรอกด่วน)</h3>
+        <p style="font-size: 13px; color: #64748b; margin-top: -8px;">เลือกยาพื้นฐานที่ต้องการ ระบบจะช่วยกรอกข้อมูลอัตโนมัติทันทีโดยไม่ต้องพิมพ์เอง</p>
         <div id="recommendedContainer"></div>
     </div>
 
@@ -321,12 +328,41 @@
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').then(reg => {
+            const swCode = `
+                self.addEventListener('push', event => {
+                    const data = event.data ? event.data.json() : {};
+                    event.waitUntil(
+                        self.registration.showNotification(data.title || '🏥 Dee - Dose เตือนทานยา', {
+                            body: data.body || 'ได้เวลาทานยาแล้วครับ!',
+                            icon: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png',
+                            badge: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png',
+                            vibrate: [200, 100, 200, 100, 400],
+                            requireInteraction: true
+                        })
+                    );
+                });
+                self.addEventListener('notificationclick', event => {
+                    event.notification.close();
+                    event.waitUntil(
+                        clients.matchAll({ type: 'window' }).then(clientList => {
+                            for (let client of clientList) {
+                                if (client.url && 'focus' in client) return client.focus();
+                            }
+                            if (clients.openWindow) return clients.openWindow('/');
+                        })
+                    );
+                });
+            `;
+            const blob = new Blob([swCode], { type: 'application/javascript' });
+            const blobUrl = URL.createObjectURL(blob);
+            
+            navigator.serviceWorker.register(blobUrl).then(reg => {
                 swRegistration = reg;
-            }).catch(err => console.log('Service Worker Registration Failed: ', err));
+            }).catch(err => console.log('Service Worker Status: Basic Mode Enabled'));
         });
     }
 
+    // รายการยาสามัญประจำบ้านพร้อมสรรพคุณ และข้อมูลสำหรับตั้งค่าด่วน
     const recommendedMeds = [
         {
             name: "พาราสีตามอล (Paracetamol)",
@@ -335,17 +371,17 @@
             category: "⚪ ยาเม็ด (Tablet)",
             meal: "หลังอาหาร (After Meals)",
             time: "08:00",
-            propTH: "บรรเทาอาการปวดระดับเล็กน้อยถึงปานกลาง และลดไข้",
-            propEN: "Relieves mild to moderate pain and reduces fever."
+            propTH: "บรรเทาอาการปวดระดับเล็กน้อยถึงปานกลาง ปวดศีรษะ และลดไข้",
+            propEN: "Relieves mild to moderate pain, headache, and reduces fever."
         },
         {
-            name: "เซทิริซีน (Cetirizine)",
+            name: "เซทิริซีน (Cetirizine - ยาแก้แพ้)",
             dose: "10 mg",
             amount: "1",
             category: "⚪ ยาเม็ด (Tablet)",
             meal: "ก่อนนอน (Before Bed)",
             time: "21:00",
-            propTH: "รักษาอาการแพ้ เช่น น้ำมูกไหล จาม ผื่นคัน คันตา",
+            propTH: "รักษาอาการแพ้ เช่น น้ำมูกไหล จาม ผื่นคัน คันตา คันคอ",
             propEN: "Treats allergy symptoms like runny nose, sneezing, and hives."
         },
         {
@@ -355,27 +391,27 @@
             category: "🥤 ผงละลายน้ำ/ยาน้ำ (Liquid)",
             meal: "หลังอาหาร (After Meals)",
             time: "12:00",
-            propTH: "แก้ปวดท้อง จุกเสียด แน่นท้อง ท้องเสียถ่ายเป็นน้ำ",
+            propTH: "แก้ปวดท้อง จุกเสียด แน่นท้อง ท้องอืด ท้องเสียถ่ายเป็นน้ำ",
             propEN: "Relieves stomachache, flatulence, and mild diarrhea."
         },
         {
-            name: "อม็อกซีซิลลิน (Amoxicillin)",
+            name: "อม็อกซีซิลลิน (Amoxicillin - ยาฆ่าเชื้อ)",
             dose: "500 mg",
             amount: "1",
             category: "💊 แคปซูล (Capsule)",
             meal: "หลังอาหาร (After Meals)",
             time: "08:00",
-            propTH: "ต้านเชื้อแบคทีเรีย รักษาการติดเชื้อทางเดินหายใจ/คออักเสบ",
+            propTH: "ต้านเชื้อแบคทีเรีย รักษาการติดเชื้อทางเดินหายใจ/เจ็บคออักเสบ",
             propEN: "Antibiotic used to treat bacterial infections."
         },
         {
-            name: "ยาแก้ไอ ดักเสมหะ (Bromhexine)",
+            name: "ยาแก้ไอ ละลายเสมหะ (Bromhexine)",
             dose: "8 mg",
             amount: "1",
             category: "⚪ ยาเม็ด (Tablet)",
             meal: "หลังอาหาร (After Meals)",
             time: "13:00",
-            propTH: "ช่วยขับเสมหะ ละลายเสมหะ บรรเทาอาการไอ",
+            propTH: "ช่วยขับเสมหะ ละลายเสมหะที่เหนียวข้น บรรเทาอาการไอ",
             propEN: "Mucolytic agent for easing coughs with mucus."
         }
     ];
@@ -383,7 +419,7 @@
     const dict = {
         th: {
             profileHeader: "ข้อมูลผู้ใช้ & คู่หูดูแลสุขภาพ", genderLabel: "เพศ", ageLabel: "ช่วงวัย",
-            recHeader: "💡 ยาน่ารู้ & กดบันทึกด่วน (Quick Presets)",
+            recHeader: "💡 ยาสามัญประจำบ้านแนะนำ (กดปุ่มเพื่อกรอกด่วน)",
             formAdd: "เพิ่มรายการยาใหม่", formEdit: "แก้ไขรายการยา",
             medName: "ชื่อยา", medDose: "ขนาดยา (เช่น 500mg, 10ml)", medAmount: "จำนวนต่อครั้ง (กี่เม็ด/กี่ชิ้น)", medCategory: "รูปแบบ / หมวดหมู่ยา", medMeal: "ช่วงเวลาทานยา",
             startDate: "วันเริ่มต้น", endDate: "วันสิ้นสุด", medTime: "เวลาแจ้งเตือน",
@@ -393,7 +429,7 @@
         },
         en: {
             profileHeader: "User Profile & Health Companion", genderLabel: "Gender", ageLabel: "Age Group",
-            recHeader: "💡 Drug Knowledge & Quick Presets",
+            recHeader: "💡 Essential Home Medicines (Quick Auto-Fill)",
             formAdd: "Add New Medication", formEdit: "Edit Medication",
             medName: "Medicine Name", medDose: "Dose (e.g. 500mg, 10ml)", medAmount: "Amount per Take", medCategory: "Form / Category", medMeal: "Meal Timing",
             startDate: "Start Date", endDate: "End Date", medTime: "Reminder Time",
@@ -429,14 +465,14 @@
         if ('Notification' in window) {
             Notification.requestPermission().then(permission => {
                 if (permission === 'granted') {
-                    alert('เปิดการแจ้งเตือน Dee - Dose เรียบร้อยแล้ว!');
-                    showSystemNotification("🏥 Dee - Dose ระบบแจ้งเตือนพร้อมใช้งาน", "ระบบเปิดการแจ้งเตือนเรียบร้อยแล้วครับ");
+                    alert('เปิดระบบ Pop-up แจ้งเตือน Dee - Dose เรียบร้อยแล้ว!');
+                    showSystemNotification("🏥 Dee - Dose พร้อมใช้งาน", "ระบบเปิด Pop-up แจ้งเตือนบนหน้าจอล็อกเรียบร้อยแล้วครับ");
                 } else {
-                    alert('การแจ้งเตือนถูกปิดอยู่ โปรดเปิดอนุญาตในตั้งค่าของเบราว์เซอร์');
+                    alert('การแจ้งเตือนถูกปิดอยู่ โปรดอนุญาตในการตั้งค่าเบราว์เซอร์');
                 }
             });
         } else {
-            alert('เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือนแบบ Push');
+            alert('เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือนแบบ Pop-up');
         }
     }
 
@@ -447,7 +483,9 @@
                 icon: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
                 badge: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
                 requireInteraction: true,
-                vibrate: [300, 100, 300]
+                vibrate: [300, 150, 300],
+                tag: 'dee-dose-alarm',
+                renotify: true
             };
 
             if (swRegistration) {
@@ -474,6 +512,7 @@
         profile.pet = document.getElementById('petSelect').value;
         document.getElementById('alarmPet').innerText = profile.pet;
         saveProfile();
+        playPetSound();
     }
 
     function changeLang() {
@@ -504,25 +543,30 @@
         renderCalendar();
     }
 
+    // แสดงการ์ดยาแนะนำพร้อมปุ่มกรอกอัตโนมัติ
     function renderRecommendations() {
         const container = document.getElementById('recommendedContainer');
         container.innerHTML = "";
         recommendedMeds.forEach((m, idx) => {
             const prop = currentLang === 'th' ? m.propTH : m.propEN;
             container.innerHTML += `
-                <div style="border: 1px solid var(--border); padding: 12px; border-radius: 10px; margin-bottom: 10px;">
-                    <h4 style="margin:0 0 4px 0;">💊 ${m.name}</h4>
-                    <p style="font-size:13px; color:#475569; margin:4px 0;"><strong>สรรพคุณ:</strong> ${prop}</p>
-                    <p style="font-size:12px; color:#64748b; margin:4px 0;"><strong>ขนาดยา:</strong> ${m.dose} | ⏰ เวลาแนะนำ: ${m.time} น.</p>
-                    <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button onclick="useRecommendation(${idx})" style="padding:6px 10px; font-size:12px; background:#f1f5f9; color:#0f172a; border:1px solid var(--border);">✏️ แก้ไขก่อนบันทึก</button>
-                        <button onclick="quickAddPreset(${idx})" style="padding:6px 10px; font-size:12px; background:#22c55e;">⚡ เพิ่มเข้าตารางทันที (ทุกวัน)</button>
+                <div style="border: 1px solid var(--border); padding: 12px; border-radius: 10px; margin-bottom: 10px; background: #fafafa;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0 0 4px 0; color:#1e40af;">💊 ${m.name}</h4>
+                        <span class="preset-badge">ยาสามัญ</span>
+                    </div>
+                    <p style="font-size:13px; color:#334155; margin:4px 0;"><strong>สรรพคุณ:</strong> ${prop}</p>
+                    <p style="font-size:12px; color:#64748b; margin:4px 0;"><strong>ขนาดยามาตรฐาน:</strong> ${m.dose} | ⏰ เวลาแนะนำ: ${m.time} น.</p>
+                    <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button onclick="useRecommendation(${idx})" style="padding:6px 12px; font-size:12px; background:#3b82f6; color:white;">⚡ ดึงข้อมูลลงฟอร์ม (ปรับแก้ก่อนเซฟ)</button>
+                        <button onclick="quickAddPreset(${idx})" style="padding:6px 12px; font-size:12px; background:#22c55e;">✅ บันทึกเข้าตารางทันที (ทานทุกวัน)</button>
                     </div>
                 </div>
             `;
         });
     }
 
+    // ฟังก์ชันเพิ่มยาเข้าตารางทันทีโดยไม่ต้องผ่านฟอร์ม
     function quickAddPreset(idx) {
         unlockAudio();
         const rec = recommendedMeds[idx];
@@ -545,9 +589,10 @@
         localStorage.setItem('deedose_items', JSON.stringify(medicines));
         renderList();
         renderCalendar();
-        alert(`เพิ่มรายการ "${rec.name}" เรียบร้อยแล้ว!`);
+        alert(`เพิ่มรายการ "${rec.name}" เข้าตารางเตือนทานยาเรียบร้อยแล้ว!`);
     }
 
+    // ฟังก์ชันดึงข้อมูลยาลงฟอร์มให้อัตโนมัติ เพื่อให้ผู้ใช้ปรับแต่งเวลาเพิ่มเติม
     function useRecommendation(idx) {
         const rec = recommendedMeds[idx];
         const todayStr = new Date().toISOString().split('T')[0];
@@ -779,7 +824,6 @@
         document.getElementById('logModal').style.display = "none";
     }
 
-    // 🔊 ระบบสังเคราะห์เสียงสัตว์เลี้ยงเลียนแบบเสียงธรรมชาติ
     function playPetSound() {
         try {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -789,94 +833,91 @@
             const now = audioCtx.currentTime;
 
             if (pet === '🐱') {
-                // 🐱 เสียงแมวเมี๊ยว (Meow)
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                osc.type = "sine";
                 
-                // สไลด์โทนเสียงจากต่ำ -> สูง -> ต่ำลงเล็กน้อย
-                osc.frequency.setValueAtTime(380, now);
-                osc.frequency.exponentialRampToValueAtTime(820, now + 0.25);
-                osc.frequency.exponentialRampToValueAtTime(320, now + 0.7);
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(550, now);
+                osc.frequency.exponentialRampToValueAtTime(850, now + 0.2);
+                osc.frequency.exponentialRampToValueAtTime(400, now + 0.8);
 
-                gain.gain.setValueAtTime(0, now);
-                gain.gain.linearRampToValueAtTime(0.45, now + 0.1);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
+                gain.gain.setValueAtTime(0.01, now);
+                gain.gain.linearRampToValueAtTime(0.25, now + 0.15);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
 
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start(now);
-                osc.stop(now + 0.7);
+                osc.stop(now + 0.8);
 
             } else if (pet === '🐶') {
-                // 🐶 เสียงสุนัขเห่า (Bark - โฮ่ง! โฮ่ง!)
-                [0, 0.22].forEach(delay => {
+                [0, 0.25].forEach(delay => {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
-                    osc.type = "sawtooth";
                     
+                    osc.type = "triangle";
                     osc.frequency.setValueAtTime(220, now + delay);
-                    osc.frequency.exponentialRampToValueAtTime(60, now + delay + 0.14);
+                    osc.frequency.exponentialRampToValueAtTime(110, now + delay + 0.15);
 
-                    gain.gain.setValueAtTime(0.6, now + delay);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.14);
+                    gain.gain.setValueAtTime(0.01, now + delay);
+                    gain.gain.linearRampToValueAtTime(0.3, now + delay + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.15);
 
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
                     osc.start(now + delay);
-                    osc.stop(now + delay + 0.14);
+                    osc.stop(now + delay + 0.15);
                 });
 
             } else if (pet === '🐦') {
-                // 🐦 เสียงนกร้องจิ๊บๆ (Chirp - จิ๊บ! จิ๊บ!)
-                [0, 0.15].forEach(delay => {
+                [0, 0.12, 0.24].forEach((delay, index) => {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
-                    osc.type = "sine";
                     
-                    osc.frequency.setValueAtTime(2000, now + delay);
-                    osc.frequency.linearRampToValueAtTime(3500, now + delay + 0.06);
-                    osc.frequency.linearRampToValueAtTime(1800, now + delay + 0.12);
+                    osc.type = "sine";
+                    const startFreq = 2200 + (index * 200);
+                    osc.frequency.setValueAtTime(startFreq, now + delay);
+                    osc.frequency.linearRampToValueAtTime(startFreq + 600, now + delay + 0.06);
 
-                    gain.gain.setValueAtTime(0.35, now + delay);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.12);
+                    gain.gain.setValueAtTime(0.01, now + delay);
+                    gain.gain.linearRampToValueAtTime(0.18, now + delay + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.08);
 
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
                     osc.start(now + delay);
-                    osc.stop(now + delay + 0.12);
+                    osc.stop(now + delay + 0.08);
                 });
 
             } else if (pet === '🐷') {
-                // 🐷 เสียงหมูร้อง (Oink-Oink - อู๊ดๆ! อู๊ดๆ!)
-                [0, 0.28].forEach(delay => {
+                [0, 0.3].forEach(delay => {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
                     
-                    // ใช้คลื่น triangle + ความถี่ต่ำเพื่อให้ได้เสียงทุ้มสั่นแบบเสียงหมู
-                    osc.type = "triangle";
+                    osc.type = "sawtooth";
                     osc.frequency.setValueAtTime(130, now + delay);
-                    osc.frequency.linearRampToValueAtTime(75, now + delay + 0.2);
+                    osc.frequency.linearRampToValueAtTime(95, now + delay + 0.22);
 
-                    gain.gain.setValueAtTime(0.5, now + delay);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.2);
+                    const filter = audioCtx.createBiquadFilter();
+                    filter.type = "lowpass";
+                    filter.frequency.setValueAtTime(400, now + delay);
 
-                    osc.connect(gain);
+                    gain.gain.setValueAtTime(0.01, now + delay);
+                    gain.gain.linearRampToValueAtTime(0.2, now + delay + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.22);
+
+                    osc.connect(filter);
+                    filter.connect(gain);
                     gain.connect(audioCtx.destination);
                     osc.start(now + delay);
-                    osc.stop(now + delay + 0.2);
+                    osc.stop(now + delay + 0.22);
                 });
             }
 
-            if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
         } catch(e) {
-            console.log("Audio play error: ", e);
+            console.log("Audio Error: ", e);
         }
-    }
-
-    function testPetSound() {
-        unlockAudio();
-        playPetSound();
     }
 
     function triggerAlarm(med) {
@@ -886,12 +927,12 @@
 
         showSystemNotification(
             `🚨 Dee - Dose ได้เวลาทานยาแล้ว! (${profile.pet || '🐱'})`,
-            `ยา: ${med.name} (${med.dose}) - ทาน ${med.amount} เม็ด [${med.meal}]`
+            `ถึงเวลาทานยา: ${med.name} (${med.dose}) - ${med.amount} เม็ด [${med.meal}]`
         );
 
         if(!alarmInterval) {
             playPetSound();
-            alarmInterval = setInterval(() => { playPetSound(); }, 1200);
+            alarmInterval = setInterval(() => { playPetSound(); }, 2500);
         }
     }
 
@@ -938,4 +979,3 @@
 
 </body>
 </html>
-
