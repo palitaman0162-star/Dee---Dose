@@ -161,13 +161,16 @@
                 <label>คู่หูสัตว์เลี้ยง</label>
                 <select id="petSelect" onchange="updatePet()">
                     <option value="🐱">🐱 แมว (Meow)</option>
-                    <option value="🐶">🐶 หมา (Bark)</option>
+                    <option value="🐶">🐶 สุนัข (Bark)</option>
                     <option value="🐦">🐦 นก (Chirp)</option>
-                    <option value="🐷">🐷 หมู (Oink)</option>
+                    <option value="🐷">🐷 หมู (Oink-Oink)</option>
                 </select>
             </div>
         </div>
-        <button onclick="requestNotificationPermission()" style="margin-top: 10px; width: 100%; background: #059669;">🔔 เปิดการแจ้งเตือนนอกหน้าเว็บ (Push Notification)</button>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button onclick="testPetSound()" style="flex: 1; background: #eab308; color: #0f172a;">🔊 ทดสอบเสียงสัตว์เลี้ยงที่เลือก</button>
+            <button onclick="requestNotificationPermission()" style="flex: 1.5; background: #059669;">🔔 เปิดการแจ้งเตือนนอกหน้าเว็บ</button>
+        </div>
     </div>
 
     <!-- Quick Presets / Recommendations -->
@@ -288,7 +291,7 @@
         <span id="alarmPet" style="font-size: 60px;">🐱</span>
         <h2 id="t-alarmTitle" style="color: #dc2626; margin: 10px 0;">🚨 ได้เวลาทานยาแล้ว!</h2>
         <p id="petTalk" style="color: #475569;">อย่าลืมทานยาให้ตรงเวลานะครับ!</p>
-        <div id="alarmDetails" style="background: #f1f5f9; padding: 10px; border-radius: 8px; margin: 15px 0; text-align: left; font-size: 14px; whitespace: pre-line;"></div>
+        <div id="alarmDetails" style="background: #f1f5f9; padding: 10px; border-radius: 8px; margin: 15px 0; text-align: left; font-size: 14px; white-space: pre-line;"></div>
         <button onclick="stopAlarm()" style="width:100%; background: #22c55e; font-size: 16px; padding: 12px;">✅ ทานยาเรียบร้อยแล้ว</button>
     </div>
 </div>
@@ -776,6 +779,7 @@
         document.getElementById('logModal').style.display = "none";
     }
 
+    // 🔊 ระบบสังเคราะห์เสียงสัตว์เลี้ยงเลียนแบบเสียงธรรมชาติ
     function playPetSound() {
         try {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -785,75 +789,94 @@
             const now = audioCtx.currentTime;
 
             if (pet === '🐱') {
+                // 🐱 เสียงแมวเมี๊ยว (Meow)
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = "sine";
-                osc.frequency.setValueAtTime(420, now);
-                osc.frequency.exponentialRampToValueAtTime(780, now + 0.25);
-                osc.frequency.exponentialRampToValueAtTime(360, now + 0.65);
-               
+                
+                // สไลด์โทนเสียงจากต่ำ -> สูง -> ต่ำลงเล็กน้อย
+                osc.frequency.setValueAtTime(380, now);
+                osc.frequency.exponentialRampToValueAtTime(820, now + 0.25);
+                osc.frequency.exponentialRampToValueAtTime(320, now + 0.7);
+
                 gain.gain.setValueAtTime(0, now);
-                gain.gain.linearRampToValueAtTime(0.4, now + 0.1);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.65);
+                gain.gain.linearRampToValueAtTime(0.45, now + 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
 
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start(now);
-                osc.stop(now + 0.65);
+                osc.stop(now + 0.7);
 
             } else if (pet === '🐶') {
-                [0, 0.18].forEach(delay => {
+                // 🐶 เสียงสุนัขเห่า (Bark - โฮ่ง! โฮ่ง!)
+                [0, 0.22].forEach(delay => {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
                     osc.type = "sawtooth";
-                    osc.frequency.setValueAtTime(170, now + delay);
-                    osc.frequency.exponentialRampToValueAtTime(75, now + delay + 0.11);
+                    
+                    osc.frequency.setValueAtTime(220, now + delay);
+                    osc.frequency.exponentialRampToValueAtTime(60, now + delay + 0.14);
 
-                    gain.gain.setValueAtTime(0.5, now + delay);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.11);
+                    gain.gain.setValueAtTime(0.6, now + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.14);
 
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
                     osc.start(now + delay);
-                    osc.stop(now + delay + 0.11);
+                    osc.stop(now + delay + 0.14);
                 });
 
             } else if (pet === '🐦') {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = "sine";
-                osc.frequency.setValueAtTime(2200, now);
-                osc.frequency.linearRampToValueAtTime(3200, now + 0.08);
-                osc.frequency.linearRampToValueAtTime(1900, now + 0.16);
+                // 🐦 เสียงนกร้องจิ๊บๆ (Chirp - จิ๊บ! จิ๊บ!)
+                [0, 0.15].forEach(delay => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = "sine";
+                    
+                    osc.frequency.setValueAtTime(2000, now + delay);
+                    osc.frequency.linearRampToValueAtTime(3500, now + delay + 0.06);
+                    osc.frequency.linearRampToValueAtTime(1800, now + delay + 0.12);
 
-                gain.gain.setValueAtTime(0.35, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+                    gain.gain.setValueAtTime(0.35, now + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.12);
 
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start(now);
-                osc.stop(now + 0.16);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + delay);
+                    osc.stop(now + delay + 0.12);
+                });
 
             } else if (pet === '🐷') {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = "sawtooth";
-                osc.frequency.setValueAtTime(120, now);
-                osc.frequency.linearRampToValueAtTime(90, now + 0.2);
+                // 🐷 เสียงหมูร้อง (Oink-Oink - อู๊ดๆ! อู๊ดๆ!)
+                [0, 0.28].forEach(delay => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    
+                    // ใช้คลื่น triangle + ความถี่ต่ำเพื่อให้ได้เสียงทุ้มสั่นแบบเสียงหมู
+                    osc.type = "triangle";
+                    osc.frequency.setValueAtTime(130, now + delay);
+                    osc.frequency.linearRampToValueAtTime(75, now + delay + 0.2);
 
-                gain.gain.setValueAtTime(0.4, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    gain.gain.setValueAtTime(0.5, now + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.2);
 
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start(now);
-                osc.stop(now + 0.2);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + delay);
+                    osc.stop(now + delay + 0.2);
+                });
             }
 
             if (navigator.vibrate) navigator.vibrate([300, 150, 300]);
         } catch(e) {
             console.log("Audio play error: ", e);
         }
+    }
+
+    function testPetSound() {
+        unlockAudio();
+        playPetSound();
     }
 
     function triggerAlarm(med) {
@@ -915,3 +938,4 @@
 
 </body>
 </html>
+
