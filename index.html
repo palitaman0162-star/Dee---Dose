@@ -149,41 +149,32 @@
             </select>
         </div>
         <hr style="margin: 15px 0; border: none; border-top: 1px solid var(--border);">
-        <h3 id="t-profileHeader">ข้อมูลผู้ใช้ & คู่หูดูแลสุขภาพ</h3>
+        <h3 id="t-profileHeader">ข้อมูลผู้ใช้</h3>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <div class="form-group" style="flex:1;">
                 <label id="t-genderLabel">เพศ</label>
                 <select id="userGender" onchange="saveProfile()">
-                    <option value="male">ชาย</option>
-                    <option value="female">หญิง</option>
+                    <option value="male" id="opt-male">ชาย</option>
+                    <option value="female" id="opt-female">หญิง</option>
                 </select>
             </div>
             <div class="form-group" style="flex:1;">
                 <label id="t-ageLabel">ช่วงวัย</label>
                 <select id="userAge" onchange="saveProfile()">
-                    <option value="child">เด็ก</option>
-                    <option value="adult">ผู้ใหญ่</option>
-                    <option value="elder">ผู้สูงอายุ</option>
-                </select>
-            </div>
-            <div class="form-group" style="flex:1;">
-                <label>คู่หูสัตว์เลี้ยง</label>
-                <select id="petSelect" onchange="updatePet()">
-                    <option value="🐱">🐱 แมว (เหมียว~)</option>
-                    <option value="🐶">🐶 สุนัข (โฮ่งๆ หอนดัง!)</option>
-                    <option value="🐦">🐦 นก (จิ๊บๆ~)</option>
-                    <option value="🐷">🐷 หมู (อู๊ดๆ~)</option>
+                    <option value="child" id="opt-child">เด็ก</option>
+                    <option value="adult" id="opt-adult">ผู้ใหญ่</option>
+                    <option value="elder" id="opt-elder">ผู้สูงอายุ</option>
                 </select>
             </div>
         </div>
-        <button onclick="requestNotificationPermission()" style="margin-top: 10px; width: 100%; background: #059669;">🔔 เปิดระบบ Pop-up เตือนบนหน้าจอล็อก (System Notification)</button>
-        <button onclick="testAlarmSound()" style="margin-top: 8px; width: 100%; background: #eab308; color: black;">🔊 ทดสอบฟังเสียงแจ้งเตือนสัตว์เลี้ยง (เสียงดังต่อเนื่อง)</button>
+        <button id="btnNotifPerm" onclick="requestNotificationPermission()" style="margin-top: 10px; width: 100%; background: #059669;">🔔 เปิดระบบการแจ้งเตือนเตือนบนหน้าจอล็อก</button>
+        <button id="btnTestSound" onclick="testAlarmSound()" style="margin-top: 8px; width: 100%; background: #eab308; color: black;">⏰ ทดสอบฟังเสียงแจ้งเตือนแบบนาฬิกาปลุก</button>
     </div>
 
     <!-- Quick Presets / Recommendations -->
     <div class="card">
         <h3 id="t-recHeader">💡 ยาสามัญประจำบ้านแนะนำ (กดปุ่มเพื่อกรอกด่วน)</h3>
-        <p style="font-size: 13px; color: #64748b; margin-top: -8px;">เลือกยาพื้นฐานที่ต้องการ ระบบจะช่วยกรอกข้อมูลอัตโนมัติทันทีโดยไม่ต้องพิมพ์เอง</p>
+        <p id="t-recSub" style="font-size: 13px; color: #64748b; margin-top: -8px;">เลือกยาพื้นฐานที่ต้องการ ระบบจะช่วยกรอกข้อมูลอัตโนมัติทันทีโดยไม่ต้องพิมพ์เอง</p>
         <div id="recommendedContainer"></div>
     </div>
 
@@ -212,17 +203,17 @@
             <div class="form-group" style="flex:1;">
                 <label id="t-medCategory">หมวดหมู่ยา</label>
                 <select id="medCategory">
-                    <option value="⚪ ยาเม็ด (Tablet)">⚪ ยาเม็ด (Tablet)</option>
-                    <option value="💊 แคปซูล (Capsule)">💊 แคปซูล (Capsule)</option>
-                    <option value="🥤 ผงละลายน้ำ/ยาน้ำ (Liquid)">🥤 ยาน้ำ/ยาน้ำแขวนตะกอน</option>
+                    <option value="tablet">⚪ ยาเม็ด (Tablet)</option>
+                    <option value="capsule">💊 แคปซูล (Capsule)</option>
+                    <option value="liquid">🥤 ยาน้ำ/ยาน้ำแขวนตะกอน (Liquid)</option>
                 </select>
             </div>
             <div class="form-group" style="flex:1;">
                 <label id="t-medMeal">ช่วงเวลาทานยา</label>
                 <select id="medMeal">
-                    <option value="หลังอาหาร (After Meals)">หลังอาหาร (After Meals)</option>
-                    <option value="ก่อนอาหาร (Before Meals)">ก่อนอาหาร (Before Meals)</option>
-                    <option value="ก่อนนอน (Before Bed)">ก่อนนอน (Before Bed)</option>
+                    <option value="afterMeal">หลังอาหาร (After Meals)</option>
+                    <option value="beforeMeal">ก่อนอาหาร (Before Meals)</option>
+                    <option value="beforeBed">ก่อนนอน (Before Bed)</option>
                 </select>
             </div>
         </div>
@@ -236,7 +227,7 @@
                 <label id="t-endDate">วันสิ้นสุด</label>
                 <input type="date" id="endDate">
                 <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; margin-top: 4px;">
-                    <input type="checkbox" id="everydayCheck" onchange="toggleEverydayOption()"> 🔄 ทานทุกวัน (ไม่มีวันสิ้นสุด)
+                    <input type="checkbox" id="everydayCheck" onchange="toggleEverydayOption()"> <span id="t-everydayText">🔄 ทานทุกวัน (ไม่มีวันสิ้นสุด)</span>
                 </label>
             </div>
             <div class="form-group" style="flex:1;">
@@ -270,12 +261,12 @@
 
     <!-- Access Logs -->
     <div class="card">
-        <h3>📜 ประวัติการเข้าใช้งานระบบ</h3>
+        <h3 id="t-logHeader">📜 ประวัติการเข้าใช้งานระบบ</h3>
         <table style="width:100%; border-collapse: collapse; font-size: 13px;">
             <thead>
                 <tr style="border-bottom: 1px solid var(--border); text-align: left;">
-                    <th style="padding: 6px;">เวลา</th>
-                    <th style="padding: 6px;">อุปกรณ์</th>
+                    <th id="t-thTime" style="padding: 6px;">เวลา</th>
+                    <th id="t-thDevice" style="padding: 6px;">อุปกรณ์</th>
                 </tr>
             </thead>
             <tbody id="accessLogList"></tbody>
@@ -289,18 +280,18 @@
     <div class="modal-content">
         <h3 id="logDateTitle">📅 ประวัติการทานยา</h3>
         <div id="logContent" style="margin: 15px 0;"></div>
-        <button onclick="closeLogModal()" style="width:100%;">ปิดหน้าต่าง</button>
+        <button id="btnCloseLog" onclick="closeLogModal()" style="width:100%;">ปิดหน้าต่าง</button>
     </div>
 </div>
 
 <!-- Modal สัญญาณเตือนเมื่อถึงเวลา -->
 <div id="alarmModal" class="modal">
     <div class="modal-content" style="text-align: center;">
-        <span id="alarmPet" style="font-size: 60px;">🐱</span>
-        <h2 id="t-alarmTitle" style="color: #dc2626; margin: 10px 0;">🚨 ได้เวลาทานยาแล้ว!</h2>
-        <p id="petTalk" style="color: #475569;">อย่าลืมทานยาให้ตรงเวลานะครับ!</p>
+        <span style="font-size: 60px;">⏰</span>
+        <h2 id="t-alarmTitle" style="color: #dc2626; margin: 10px 0;">⏰ ได้เวลาทานยาแล้ว!</h2>
+        <p id="t-alarmSub" style="color: #475569;">กรุณาทานยาตามเวลาที่กำหนด</p>
         <div id="alarmDetails" style="background: #f1f5f9; padding: 10px; border-radius: 8px; margin: 15px 0; text-align: left; font-size: 14px; white-space: pre-line;"></div>
-        <button onclick="stopAlarm()" style="width:100%; background: #22c55e; font-size: 16px; padding: 12px;">✅ ทานยาเรียบร้อยแล้ว (ปิดเสียงเตือน)</button>
+        <button id="btnStopAlarm" onclick="stopAlarm()" style="width:100%; background: #22c55e; font-size: 16px; padding: 12px;">✅ ทานยาเรียบร้อยแล้ว (ปิดเสียงเตือน)</button>
     </div>
 </div>
 
@@ -308,7 +299,7 @@
     let swRegistration = null;
     let medicines = JSON.parse(localStorage.getItem('deedose_items')) || [];
     let logs = JSON.parse(localStorage.getItem('deedose_logs')) || {};
-    let profile = JSON.parse(localStorage.getItem('deedose_profile')) || { gender: 'male', age: 'adult', pet: '🐱' };
+    let profile = JSON.parse(localStorage.getItem('deedose_profile')) || { gender: 'male', age: 'adult' };
    
     let currentLang = 'th';
     let alarmInterval = null;
@@ -333,11 +324,11 @@
                 self.addEventListener('push', event => {
                     const data = event.data ? event.data.json() : {};
                     event.waitUntil(
-                        self.registration.showNotification(data.title || '🏥 Dee - Dose เตือนทานยา', {
-                            body: data.body || 'ได้เวลาทานยาแล้วครับ!',
+                        self.registration.showNotification(data.title || '🏥 Dee - Dose', {
+                            body: data.body || 'Time to take your medicine!',
                             icon: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png',
                             badge: 'https://cdn-icons-png.flaticon.com/512/3063/3063822.png',
-                            vibrate: [200, 100, 200, 100, 400],
+                            vibrate: [300, 100, 300, 100, 300],
                             requireInteraction: true
                         })
                     );
@@ -359,57 +350,62 @@
             
             navigator.serviceWorker.register(blobUrl).then(reg => {
                 swRegistration = reg;
-            }).catch(err => console.log('Service Worker Status: Basic Mode Enabled'));
+            }).catch(err => console.log('Service Worker Enabled'));
         });
     }
 
     const recommendedMeds = [
         {
-            name: "พาราสีตามอล (Paracetamol)",
+            nameTH: "พาราสีตามอล (Paracetamol)",
+            nameEN: "Paracetamol",
             dose: "500 mg",
             amount: "1",
-            category: "⚪ ยาเม็ด (Tablet)",
-            meal: "หลังอาหาร (After Meals)",
+            categoryKey: "tablet",
+            mealKey: "afterMeal",
             time: "08:00",
             propTH: "บรรเทาอาการปวดระดับเล็กน้อยถึงปานกลาง ปวดศีรษะ และลดไข้",
             propEN: "Relieves mild to moderate pain, headache, and reduces fever."
         },
         {
-            name: "เซทิริซีน (Cetirizine - ยาแก้แพ้)",
+            nameTH: "เซทิริซีน (Cetirizine - ยาแก้แพ้)",
+            nameEN: "Cetirizine (Antihistamine)",
             dose: "10 mg",
             amount: "1",
-            category: "⚪ ยาเม็ด (Tablet)",
-            meal: "ก่อนนอน (Before Bed)",
+            categoryKey: "tablet",
+            mealKey: "beforeBed",
             time: "21:00",
             propTH: "รักษาอาการแพ้ เช่น น้ำมูกไหล จาม ผื่นคัน คันตา คันคอ",
             propEN: "Treats allergy symptoms like runny nose, sneezing, and hives."
         },
         {
-            name: "ยาธาตุน้ำขาว (Salol & Menthol)",
+            nameTH: "ยาธาตุน้ำขาว (Salol & Menthol)",
+            nameEN: "Salol & Menthol Mixture",
             dose: "15 ml",
             amount: "1",
-            category: "🥤 ผงละลายน้ำ/ยาน้ำ (Liquid)",
-            meal: "หลังอาหาร (After Meals)",
+            categoryKey: "liquid",
+            mealKey: "afterMeal",
             time: "12:00",
             propTH: "แก้ปวดท้อง จุกเสียด แน่นท้อง ท้องอืด ท้องเสียถ่ายเป็นน้ำ",
             propEN: "Relieves stomachache, flatulence, and mild diarrhea."
         },
         {
-            name: "อม็อกซีซิลลิน (Amoxicillin - ยาฆ่าเชื้อ)",
+            nameTH: "อม็อกซีซิลลิน (Amoxicillin - ยาฆ่าเชื้อ)",
+            nameEN: "Amoxicillin (Antibiotics)",
             dose: "500 mg",
             amount: "1",
-            category: "💊 แคปซูล (Capsule)",
-            meal: "หลังอาหาร (After Meals)",
+            categoryKey: "capsule",
+            mealKey: "afterMeal",
             time: "08:00",
             propTH: "ต้านเชื้อแบคทีเรีย รักษาการติดเชื้อทางเดินหายใจ/เจ็บคออักเสบ",
             propEN: "Antibiotic used to treat bacterial infections."
         },
         {
-            name: "ยาแก้ไอ ละลายเสมหะ (Bromhexine)",
+            nameTH: "ยาแก้ไอ ละลายเสมหะ (Bromhexine)",
+            nameEN: "Bromhexine (Cough Mixture)",
             dose: "8 mg",
             amount: "1",
-            category: "⚪ ยาเม็ด (Tablet)",
-            meal: "หลังอาหาร (After Meals)",
+            categoryKey: "tablet",
+            mealKey: "afterMeal",
             time: "13:00",
             propTH: "ช่วยขับเสมหะ ละลายเสมหะที่เหนียวข้น บรรเทาอาการไอ",
             propEN: "Mucolytic agent for easing coughs with mucus."
@@ -418,32 +414,98 @@
 
     const dict = {
         th: {
-            profileHeader: "ข้อมูลผู้ใช้ & คู่หูดูแลสุขภาพ", genderLabel: "เพศ", ageLabel: "ช่วงวัย",
+            profileHeader: "ข้อมูลผู้ใช้", genderLabel: "เพศ", ageLabel: "ช่วงวัย",
+            genderMale: "ชาย", genderFemale: "หญิง",
+            ageChild: "เด็ก", ageAdult: "ผู้ใหญ่", ageElder: "ผู้สูงอายุ",
+            btnNotifPerm: "🔔 เปิดระบบการแจ้งเตือนเตือนบนหน้าจอล็อก",
+            btnTestSound: "⏰ ทดสอบฟังเสียงแจ้งเตือนแบบนาฬิกาปลุก",
             recHeader: "💡 ยาสามัญประจำบ้านแนะนำ (กดปุ่มเพื่อกรอกด่วน)",
+            recSub: "เลือกยาพื้นฐานที่ต้องการ ระบบจะช่วยกรอกข้อมูลอัตโนมัติทันทีโดยไม่ต้องพิมพ์เอง",
+            presetBadge: "ยาสามัญ",
+            propLabel: "สรรพคุณ: ",
+            doseLabel: "ขนาดยามาตรฐาน: ",
+            timeLabel: "⏰ เวลาแนะนำ: ",
+            btnFillForm: "⚡ ดึงข้อมูลลงฟอร์ม (ปรับแก้ก่อนเซฟ)",
+            btnQuickAdd: "✅ บันทึกเข้าตารางทันที (ทานทุกวัน)",
             formAdd: "เพิ่มรายการยาใหม่", formEdit: "แก้ไขรายการยา",
-            medName: "ชื่อยา", medDose: "ขนาดยา (เช่น 500mg, 10ml)", medAmount: "จำนวนต่อครั้ง (กี่เม็ด/กี่ชิ้น)", medCategory: "รูปแบบ / หมวดหมู่ยา", medMeal: "ช่วงเวลาทานยา",
+            medName: "ชื่อยา", medNamePlaceholder: "เช่น พาราสีตามอล",
+            medDose: "ขนาดยา", medDosePlaceholder: "เช่น 500mg, 10ml",
+            medAmount: "จำนวนต่อครั้ง (กี่เม็ด/กี่ชิ้น)",
+            medCategory: "รูปแบบ / หมวดหมู่ยา",
+            medMeal: "ช่วงเวลาทานยา",
             startDate: "วันเริ่มต้น", endDate: "วันสิ้นสุด", medTime: "เวลาแจ้งเตือน",
-            saveBtn: "บันทึกข้อมูลยา Dee - Dose", cancelBtn: "ยกเลิก", listHeader: "รายการยาที่ต้องรับประทาน", calHeader: "ตารางบันทึกการทานยา",
-            alarmTitle: "🚨 Dee - Dose ได้เวลาทานยาแล้วนะ!", petTalk: "อย่าลืมทานยาให้ตรงเวลานะครับ!",
-            days: ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส']
+            everydayText: "🔄 ทานทุกวัน (ไม่มีวันสิ้นสุด)",
+            saveBtn: "บันทึกข้อมูลยา Dee - Dose", cancelBtn: "ยกเลิก",
+            listHeader: "รายการยาที่ต้องรับประทาน",
+            noMeds: "ไม่มีรายการยาในระบบ",
+            cat_tablet: "⚪ ยาเม็ด (Tablet)", cat_capsule: "💊 แคปซูล (Capsule)", cat_liquid: "🥤 ยาน้ำ/ยาน้ำแขวนตะกอน (Liquid)",
+            meal_afterMeal: "หลังอาหาร (After Meals)", meal_beforeMeal: "ก่อนอาหาร (Before Meals)", meal_beforeBed: "ก่อนนอน (Before Bed)",
+            durationEveryday: "🔄 ทานทุกวัน (ไม่มีวันสิ้นสุด)",
+            logHeader: "📜 ประวัติการเข้าใช้งานระบบ", thTime: "เวลา", thDevice: "อุปกรณ์",
+            logModalTitle: "📅 ประวัติการทานยา", noMedsToday: "ไม่มีรายการยาที่ต้องทานในวันนี้", btnCloseLog: "ปิดหน้าต่าง",
+            alarmTitle: "⏰ ได้เวลาทานยาแล้ว!", alarmSub: "กรุณาทานยาตามเวลาที่กำหนด", btnStopAlarm: "✅ ทานยาเรียบร้อยแล้ว (ปิดเสียงเตือน)",
+            days: ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'],
+            mobDevice: "📱 มือถือ (Mobile)", deskDevice: "💻 คอมพิวเตอร์ (Desktop)",
+            notifGranted: "เปิดระบบการแจ้งเตือน Pop-up เรียบร้อยแล้ว!",
+            notifDenied: "การแจ้งเตือนถูกปิดอยู่ โปรดอนุญาตในการตั้งค่าเบราว์เซอร์",
+            notifNotSupp: "เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือนแบบ Pop-up",
+            alertFill: "กรุณากรอกข้อมูลให้ครบถ้วนทุกช่อง",
+            confirmDel: "ยืนยันการลบรายการนี้?"
         },
         en: {
-            profileHeader: "User Profile & Health Companion", genderLabel: "Gender", ageLabel: "Age Group",
+            profileHeader: "User Profile", genderLabel: "Gender", ageLabel: "Age Group",
+            genderMale: "Male", genderFemale: "Female",
+            ageChild: "Child", ageAdult: "Adult", ageElder: "Elderly",
+            btnNotifPerm: "🔔 Enable Lockscreen Notifications",
+            btnTestSound: "⏰ Test Clock Alarm Sound",
             recHeader: "💡 Essential Home Medicines (Quick Auto-Fill)",
+            recSub: "Select essential medicines to auto-fill details without typing.",
+            presetBadge: "Essential",
+            propLabel: "Indication: ",
+            doseLabel: "Standard Dose: ",
+            timeLabel: "⏰ Recommended Time: ",
+            btnFillForm: "⚡ Fill to Form (Edit before saving)",
+            btnQuickAdd: "✅ Add to Schedule Immediately (Daily)",
             formAdd: "Add New Medication", formEdit: "Edit Medication",
-            medName: "Medicine Name", medDose: "Dose (e.g. 500mg, 10ml)", medAmount: "Amount per Take", medCategory: "Form / Category", medMeal: "Meal Timing",
+            medName: "Medicine Name", medNamePlaceholder: "e.g. Paracetamol",
+            medDose: "Dose", medDosePlaceholder: "e.g. 500mg, 10ml",
+            medAmount: "Amount per Take",
+            medCategory: "Form / Category",
+            medMeal: "Meal Timing",
             startDate: "Start Date", endDate: "End Date", medTime: "Reminder Time",
-            saveBtn: "Save Medication", cancelBtn: "Cancel", listHeader: "Scheduled Medications", calHeader: "Medication Calendar",
-            alarmTitle: "🚨 Dee - Dose: Time to take medicine!", petTalk: "Don't forget to take your medicine on time!",
-            days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+            everydayText: "🔄 Take Daily (No End Date)",
+            saveBtn: "Save Medication", cancelBtn: "Cancel",
+            listHeader: "Scheduled Medications",
+            noMeds: "No medications found.",
+            cat_tablet: "⚪ Tablet", cat_capsule: "💊 Capsule", cat_liquid: "🥤 Liquid / Suspension",
+            meal_afterMeal: "After Meals", meal_beforeMeal: "Before Meals", meal_beforeBed: "Before Bed",
+            durationEveryday: "🔄 Everyday (Continuous)",
+            logHeader: "📜 System Access History", thTime: "Time", thDevice: "Device",
+            logModalTitle: "📅 Medication History", noMedsToday: "No scheduled medicines for this date.", btnCloseLog: "Close",
+            alarmTitle: "⏰ Time to take your medicine!", alarmSub: "Please take your scheduled medication.", btnStopAlarm: "✅ Taken (Stop Alarm)",
+            days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+            mobDevice: "📱 Mobile", deskDevice: "💻 Desktop",
+            notifGranted: "Pop-up Notifications Enabled!",
+            notifDenied: "Notifications are blocked. Please enable in browser settings.",
+            notifNotSupp: "Browser does not support Pop-up Notifications.",
+            alertFill: "Please fill in all required fields.",
+            confirmDel: "Are you sure you want to delete this medication?"
         }
     };
+
+    function getCategoryText(key, lang) {
+        return dict[lang]['cat_' + key] || key;
+    }
+
+    function getMealText(key, lang) {
+        return dict[lang]['meal_' + key] || key;
+    }
 
     function trackUserAccess() {
         let accessLogs = JSON.parse(localStorage.getItem('deedose_access_history')) || [];
         const now = new Date();
-        const dateStr = now.toLocaleString('th-TH');
-        const deviceType = /Mobi|Android/i.test(navigator.userAgent) ? '📱 มือถือ (Mobile)' : '💻 คอมพิวเตอร์ (Desktop)';
+        const dateStr = now.toLocaleString(currentLang === 'th' ? 'th-TH' : 'en-US');
+        const deviceType = /Mobi|Android/i.test(navigator.userAgent) ? dict[currentLang].mobDevice : dict[currentLang].deskDevice;
 
         accessLogs.unshift({ time: dateStr, device: deviceType });
         if(accessLogs.length > 15) accessLogs.pop();
@@ -465,14 +527,14 @@
         if ('Notification' in window) {
             Notification.requestPermission().then(permission => {
                 if (permission === 'granted') {
-                    alert('เปิดระบบ Pop-up แจ้งเตือน Dee - Dose เรียบร้อยแล้ว!');
-                    showSystemNotification("🏥 Dee - Dose พร้อมใช้งาน", "ระบบเปิด Pop-up แจ้งเตือนบนหน้าจอล็อกเรียบร้อยแล้วครับ");
+                    alert(dict[currentLang].notifGranted);
+                    showSystemNotification("🏥 Dee - Dose", currentLang === 'th' ? "ระบบเปิด Pop-up แจ้งเตือนบนหน้าจอล็อกเรียบร้อยแล้วครับ" : "Lockscreen notification system is active.");
                 } else {
-                    alert('การแจ้งเตือนถูกปิดอยู่ โปรดอนุญาตในการตั้งค่าเบราว์เซอร์');
+                    alert(dict[currentLang].notifDenied);
                 }
             });
         } else {
-            alert('เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือนแบบ Pop-up');
+            alert(dict[currentLang].notifNotSupp);
         }
     }
 
@@ -483,7 +545,7 @@
                 icon: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
                 badge: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
                 requireInteraction: true,
-                vibrate: [300, 150, 300, 150, 500],
+                vibrate: [300, 100, 300, 100, 300],
                 tag: 'dee-dose-alarm',
                 renotify: true
             };
@@ -498,67 +560,96 @@
 
     document.getElementById('userGender').value = profile.gender;
     document.getElementById('userAge').value = profile.age;
-    document.getElementById('petSelect').value = profile.pet;
-    document.getElementById('alarmPet').innerText = profile.pet;
 
     function saveProfile() {
         profile.gender = document.getElementById('userGender').value;
         profile.age = document.getElementById('userAge').value;
-        profile.pet = document.getElementById('petSelect').value;
         localStorage.setItem('deedose_profile', JSON.stringify(profile));
-    }
-
-    function updatePet() {
-        profile.pet = document.getElementById('petSelect').value;
-        document.getElementById('alarmPet').innerText = profile.pet;
-        saveProfile();
-        playPetSound();
     }
 
     function changeLang() {
         currentLang = document.getElementById('langSelect').value;
         const t = dict[currentLang];
+
         document.getElementById('t-profileHeader').innerText = t.profileHeader;
         document.getElementById('t-genderLabel').innerText = t.genderLabel;
         document.getElementById('t-ageLabel').innerText = t.ageLabel;
+        document.getElementById('opt-male').innerText = t.genderMale;
+        document.getElementById('opt-female').innerText = t.genderFemale;
+        document.getElementById('opt-child').innerText = t.ageChild;
+        document.getElementById('opt-adult').innerText = t.ageAdult;
+        document.getElementById('opt-elder').innerText = t.ageElder;
+
+        document.getElementById('btnNotifPerm').innerText = t.btnNotifPerm;
+        document.getElementById('btnTestSound').innerText = t.btnTestSound;
+
         document.getElementById('t-recHeader').innerText = t.recHeader;
+        document.getElementById('t-recSub').innerText = t.recSub;
+
         document.getElementById('t-medName').innerText = t.medName;
+        document.getElementById('medName').placeholder = t.medNamePlaceholder;
         document.getElementById('t-medDose').innerText = t.medDose;
+        document.getElementById('medDose').placeholder = t.medDosePlaceholder;
         document.getElementById('t-medAmount').innerText = t.medAmount;
         document.getElementById('t-medCategory').innerText = t.medCategory;
         document.getElementById('t-medMeal').innerText = t.medMeal;
         document.getElementById('t-startDate').innerText = t.startDate;
         document.getElementById('t-endDate').innerText = t.endDate;
         document.getElementById('t-medTime').innerText = t.medTime;
+        document.getElementById('t-everydayText').innerText = t.everydayText;
+
+        document.getElementById('medCategory').options[0].text = t.cat_tablet;
+        document.getElementById('medCategory').options[1].text = t.cat_capsule;
+        document.getElementById('medCategory').options[2].text = t.cat_liquid;
+
+        document.getElementById('medMeal').options[0].text = t.meal_afterMeal;
+        document.getElementById('medMeal').options[1].text = t.meal_beforeMeal;
+        document.getElementById('medMeal').options[2].text = t.meal_beforeBed;
+
         document.getElementById('t-listHeader').innerText = t.listHeader;
+        document.getElementById('t-logHeader').innerText = t.logHeader;
+        document.getElementById('t-thTime').innerText = t.thTime;
+        document.getElementById('t-thDevice').innerText = t.thDevice;
+        document.getElementById('btnCloseLog').innerText = t.btnCloseLog;
+
         document.getElementById('t-alarmTitle').innerText = t.alarmTitle;
-        document.getElementById('petTalk').innerText = t.petTalk;
-       
+        document.getElementById('t-alarmSub').innerText = t.alarmSub;
+        document.getElementById('btnStopAlarm').innerText = t.btnStopAlarm;
+
         if(!document.getElementById('editId').value) {
             document.getElementById('formTitle').innerText = t.formAdd;
             document.getElementById('btnSave').innerText = t.saveBtn;
+        } else {
+            document.getElementById('formTitle').innerText = t.formEdit;
+            document.getElementById('btnSave').innerText = t.saveBtn;
         }
+
         renderRecommendations();
         renderList();
         renderCalendar();
+        renderAccessLogs();
     }
 
     function renderRecommendations() {
         const container = document.getElementById('recommendedContainer');
         container.innerHTML = "";
+        const t = dict[currentLang];
+
         recommendedMeds.forEach((m, idx) => {
+            const name = currentLang === 'th' ? m.nameTH : m.nameEN;
             const prop = currentLang === 'th' ? m.propTH : m.propEN;
+
             container.innerHTML += `
                 <div style="border: 1px solid var(--border); padding: 12px; border-radius: 10px; margin-bottom: 10px; background: #fafafa;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h4 style="margin:0 0 4px 0; color:#1e40af;">💊 ${m.name}</h4>
-                        <span class="preset-badge">ยาสามัญ</span>
+                        <h4 style="margin:0 0 4px 0; color:#1e40af;">💊 ${name}</h4>
+                        <span class="preset-badge">${t.presetBadge}</span>
                     </div>
-                    <p style="font-size:13px; color:#334155; margin:4px 0;"><strong>สรรพคุณ:</strong> ${prop}</p>
-                    <p style="font-size:12px; color:#64748b; margin:4px 0;"><strong>ขนาดยามาตรฐาน:</strong> ${m.dose} | ⏰ เวลาแนะนำ: ${m.time} น.</p>
+                    <p style="font-size:13px; color:#334155; margin:4px 0;"><strong>${t.propLabel}</strong>${prop}</p>
+                    <p style="font-size:12px; color:#64748b; margin:4px 0;"><strong>${t.doseLabel}</strong>${m.dose} | ${t.timeLabel}${m.time} ${currentLang === 'th' ? 'น.' : ''}</p>
                     <div style="margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button onclick="useRecommendation(${idx})" style="padding:6px 12px; font-size:12px; background:#3b82f6; color:white;">⚡ ดึงข้อมูลลงฟอร์ม (ปรับแก้ก่อนเซฟ)</button>
-                        <button onclick="quickAddPreset(${idx})" style="padding:6px 12px; font-size:12px; background:#22c55e;">✅ บันทึกเข้าตารางทันที (ทานทุกวัน)</button>
+                        <button onclick="useRecommendation(${idx})" style="padding:6px 12px; font-size:12px; background:#3b82f6; color:white;">${t.btnFillForm}</button>
+                        <button onclick="quickAddPreset(${idx})" style="padding:6px 12px; font-size:12px; background:#22c55e;">${t.btnQuickAdd}</button>
                     </div>
                 </div>
             `;
@@ -572,11 +663,12 @@
 
         const medObj = {
             id: Date.now(),
-            name: rec.name,
+            nameTH: rec.nameTH,
+            nameEN: rec.nameEN,
             dose: rec.dose,
             amount: rec.amount || "1",
-            category: rec.category,
-            meal: rec.meal,
+            categoryKey: rec.categoryKey,
+            mealKey: rec.mealKey,
             start: todayStr,
             end: "2099-12-31",
             isEveryday: true,
@@ -587,17 +679,18 @@
         localStorage.setItem('deedose_items', JSON.stringify(medicines));
         renderList();
         renderCalendar();
-        alert(`เพิ่มรายการ "${rec.name}" เข้าตารางเตือนทานยาเรียบร้อยแล้ว!`);
+        alert(currentLang === 'th' ? `เพิ่มรายการ "${rec.nameTH}" เข้าตารางเตือนทานยาเรียบร้อยแล้ว!` : `Added "${rec.nameEN}" to medication schedule!`);
     }
 
     function useRecommendation(idx) {
         const rec = recommendedMeds[idx];
         const todayStr = new Date().toISOString().split('T')[0];
-        document.getElementById('medName').value = rec.name;
+        
+        document.getElementById('medName').value = currentLang === 'th' ? rec.nameTH : rec.nameEN;
         document.getElementById('medDose').value = rec.dose;
         document.getElementById('medAmount').value = rec.amount || "1";
-        document.getElementById('medCategory').value = rec.category;
-        document.getElementById('medMeal').value = rec.meal;
+        document.getElementById('medCategory').value = rec.categoryKey;
+        document.getElementById('medMeal').value = rec.mealKey;
         document.getElementById('medTime').value = rec.time || "08:00";
         document.getElementById('startDate').value = todayStr;
        
@@ -624,11 +717,11 @@
 
     function saveMedicine() {
         unlockAudio();
-        const name = document.getElementById('medName').value.trim();
+        const nameInput = document.getElementById('medName').value.trim();
         const dose = document.getElementById('medDose').value.trim();
         const amount = document.getElementById('medAmount').value;
-        const category = document.getElementById('medCategory').value;
-        const meal = document.getElementById('medMeal').value;
+        const categoryKey = document.getElementById('medCategory').value;
+        const mealKey = document.getElementById('medMeal').value;
         const start = document.getElementById('startDate').value;
         const isEveryday = document.getElementById('everydayCheck')?.checked;
         let end = document.getElementById('endDate').value;
@@ -639,12 +732,17 @@
             end = "2099-12-31";
         }
 
-        if(!name || !dose || !amount || !time || !start || !end) {
-            alert(currentLang === 'th' ? "กรุณากรอกข้อมูลให้ครบถ้วนทุกช่อง" : "Please fill in all fields.");
+        if(!nameInput || !dose || !amount || !time || !start || !end) {
+            alert(dict[currentLang].alertFill);
             return;
         }
 
-        const medObj = { id: editId ? Number(editId) : Date.now(), name, dose, amount, category, meal, start, end, isEveryday, time };
+        const medObj = { 
+            id: editId ? Number(editId) : Date.now(), 
+            nameTH: nameInput,
+            nameEN: nameInput,
+            dose, amount, categoryKey, mealKey, start, end, isEveryday, time 
+        };
 
         if(editId) {
             medicines = medicines.map(m => m.id == editId ? medObj : m);
@@ -662,11 +760,11 @@
         const item = medicines.find(m => m.id === id);
         if(!item) return;
         document.getElementById('editId').value = item.id;
-        document.getElementById('medName').value = item.name;
+        document.getElementById('medName').value = currentLang === 'th' ? (item.nameTH || item.nameEN) : (item.nameEN || item.nameTH);
         document.getElementById('medDose').value = item.dose;
         document.getElementById('medAmount').value = item.amount;
-        document.getElementById('medCategory').value = item.category;
-        document.getElementById('medMeal').value = item.meal;
+        document.getElementById('medCategory').value = item.categoryKey || "tablet";
+        document.getElementById('medMeal').value = item.mealKey || "afterMeal";
         document.getElementById('startDate').value = item.start;
         document.getElementById('endDate').value = item.end;
         document.getElementById('medTime').value = item.time;
@@ -683,7 +781,7 @@
     }
 
     function deleteMed(id) {
-        if(confirm(currentLang === 'th' ? "ยืนยันการลบรายการนี้?" : "Are you sure you want to delete?")) {
+        if(confirm(dict[currentLang].confirmDel)) {
             medicines = medicines.filter(m => m.id !== id);
             localStorage.setItem('deedose_items', JSON.stringify(medicines));
             renderList();
@@ -714,19 +812,23 @@
         container.innerHTML = "";
 
         if(medicines.length === 0) {
-            container.innerHTML = `<p style="text-align:center; color:#94a3b8; padding: 20px 0;">${currentLang === 'th' ? 'ไม่มีรายการยาในระบบ' : 'No medications found.'}</p>`;
+            container.innerHTML = `<p style="text-align:center; color:#94a3b8; padding: 20px 0;">${dict[currentLang].noMeds}</p>`;
             return;
         }
 
         medicines.forEach(m => {
-            const durationText = (m.isEveryday || m.end === "2099-12-31") ? "🔄 ทานทุกวัน (ไม่มีวันสิ้นสุด)" : `📅 ${m.start} ถึง ${m.end}`;
+            const medName = currentLang === 'th' ? (m.nameTH || m.nameEN) : (m.nameEN || m.nameTH);
+            const categoryText = getCategoryText(m.categoryKey || 'tablet', currentLang);
+            const mealText = getMealText(m.mealKey || 'afterMeal', currentLang);
+            const durationText = (m.isEveryday || m.end === "2099-12-31") ? dict[currentLang].durationEveryday : `📅 ${m.start} ${currentLang==='th'?'ถึง':'to'} ${m.end}`;
+
             container.innerHTML += `
                 <div class="med-card">
                     <div>
-                        <h4 style="margin:0 0 4px 0;">${m.name} (${m.dose})</h4>
-                        <p style="margin:2px 0; font-size:13px;"><strong>รูปแบบ:</strong> ${m.category} | <strong>ทานครั้งละ:</strong> ${m.amount} เม็ด/ชิ้น</p>
-                        <p style="margin:2px 0; font-size:13px;">📌 <strong>ช่วงเวลา:</strong> ${m.meal}</p>
-                        <p style="margin:2px 0; font-size:13px;">${durationText} | ⏰ <strong>${m.time} น.</strong></p>
+                        <h4 style="margin:0 0 4px 0;">${medName} (${m.dose})</h4>
+                        <p style="margin:2px 0; font-size:13px;"><strong>${currentLang==='th'?'รูปแบบ:':'Form:'}</strong> ${categoryText} | <strong>${currentLang==='th'?'ทานครั้งละ:':'Take:'}</strong> ${m.amount}</p>
+                        <p style="margin:2px 0; font-size:13px;">📌 <strong>${currentLang==='th'?'ช่วงเวลา:':'Timing:'}</strong> ${mealText}</p>
+                        <p style="margin:2px 0; font-size:13px;">${durationText} | ⏰ <strong>${m.time} ${currentLang==='th'?'น.':''}</strong></p>
                     </div>
                     <div style="display:flex; gap:6px;">
                         <button onclick="editMed(${m.id})" style="background:#e2e8f0; color:#0f172a;">✏️</button>
@@ -787,15 +889,18 @@
         const scheduledMeds = medicines.filter(m => dateStr >= m.start && dateStr <= m.end);
 
         if(scheduledMeds.length === 0) {
-            content.innerHTML = `<p style="color:#64748b; text-align:center;">${currentLang === 'th' ? 'ไม่มีรายการยาที่ต้องทานในวันนี้' : 'No scheduled medicines for this date.'}</p>`;
+            content.innerHTML = `<p style="color:#64748b; text-align:center;">${dict[currentLang].noMedsToday}</p>`;
         } else {
             scheduledMeds.forEach(m => {
                 const isTaken = logs[dateStr] && logs[dateStr][m.id];
+                const medName = currentLang === 'th' ? (m.nameTH || m.nameEN) : (m.nameEN || m.nameTH);
+                const mealText = getMealText(m.mealKey || 'afterMeal', currentLang);
+
                 content.innerHTML += `
                     <div style="margin-bottom:10px; padding:10px; border:1px solid var(--border); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <strong>${m.name}</strong> (${m.dose})<br>
-                            <small>${m.amount} เม็ด/ชิ้น [${m.meal}] - ⏰ ${m.time} น.</small>
+                            <strong>${medName}</strong> (${m.dose})<br>
+                            <small>${m.amount} [${mealText}] - ⏰ ${m.time} ${currentLang==='th'?'น.':''}</small>
                         </div>
                         <input type="checkbox" ${isTaken ? 'checked' : ''} onchange="toggleMedLog('${dateStr}', ${m.id}, this.checked)" style="width:20px; height:20px; cursor:pointer;">
                     </div>
@@ -821,144 +926,77 @@
         document.getElementById('logModal').style.display = "none";
     }
 
-    // ฟังก์ชันสร้างเสียงสัตว์แบบใหม่: เสียงดัง คมชัด ก้องกังวาน
-    function playPetSound() {
+    // เสียงนาฬิกาปลุกแบบนุ่มนวล ฟังแล้วไม่ตกใจ
+    function playAlarmTone() {
         try {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
            
-            const pet = profile.pet || '🐱';
             const now = audioCtx.currentTime;
-
-            if (pet === '🐱') {
-                // เสียงแมวเหมียว เสียงแหลมดังสะใจ
+            
+            // โทนเสียงดนตรีเตือนแบบนาฬิกาปลุกทั่วไป (Soft Chime Duo)
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+            notes.forEach((freq, idx) => {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                
-                osc.type = "sawtooth";
-                osc.frequency.setValueAtTime(500, now);
-                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.25);
-                osc.frequency.exponentialRampToValueAtTime(400, now + 0.8);
 
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.linearRampToValueAtTime(0.9, now + 0.15); // เร่งความดังขึ้นสูงสุด
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(freq, now + (idx * 0.12));
+
+                gain.gain.setValueAtTime(0.01, now + (idx * 0.12));
+                gain.gain.linearRampToValueAtTime(0.3, now + (idx * 0.12) + 0.03);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + (idx * 0.12) + 0.35);
 
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
-                osc.start(now);
-                osc.stop(now + 0.8);
 
-            } else if (pet === '🐶') {
-                // เสียงสุนัขเห่า/หอนเสียงทุ้มกังวานและเสียงดังลั่น
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                
-                osc.type = "sawtooth";
-                osc.frequency.setValueAtTime(300, now);
-                osc.frequency.linearRampToValueAtTime(700, now + 0.3);
-                osc.frequency.linearRampToValueAtTime(350, now + 0.9);
+                osc.start(now + (idx * 0.12));
+                osc.stop(now + (idx * 0.12) + 0.35);
+            });
 
-                const filter = audioCtx.createBiquadFilter();
-                filter.type = "lowpass";
-                filter.frequency.setValueAtTime(1500, now);
-
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.linearRampToValueAtTime(1.0, now + 0.2); // เสียงดังระดับสูงสุด
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.9);
-
-                osc.connect(filter);
-                filter.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start(now);
-                osc.stop(now + 0.9);
-
-            } else if (pet === '🐦') {
-                // เสียงนกร้องจิ๊บๆ แหลมแทงรูหูสะใจ
-                [0, 0.12, 0.24, 0.36].forEach((delay, index) => {
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    
-                    osc.type = "sine";
-                    const startFreq = 2800 + (index * 200);
-                    osc.frequency.setValueAtTime(startFreq, now + delay);
-                    osc.frequency.linearRampToValueAtTime(startFreq + 900, now + delay + 0.08);
-
-                    gain.gain.setValueAtTime(0.05, now + delay);
-                    gain.gain.linearRampToValueAtTime(0.8, now + delay + 0.02);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.09);
-
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start(now + delay);
-                    osc.stop(now + delay + 0.09);
-                });
-
-            } else if (pet === '🐷') {
-                // เสียงหมูร้องอู๊ดๆ ดังสนั่น
-                [0, 0.25].forEach(delay => {
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    
-                    osc.type = "sawtooth";
-                    osc.frequency.setValueAtTime(220, now + delay);
-                    osc.frequency.linearRampToValueAtTime(140, now + delay + 0.2);
-
-                    const filter = audioCtx.createBiquadFilter();
-                    filter.type = "lowpass";
-                    filter.frequency.setValueAtTime(800, now + delay);
-
-                    gain.gain.setValueAtTime(0.05, now + delay);
-                    gain.gain.linearRampToValueAtTime(0.9, now + delay + 0.04);
-                    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.2);
-
-                    osc.connect(filter);
-                    filter.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.start(now + delay);
-                    osc.stop(now + delay + 0.2);
-                });
-            }
-
-            if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
         } catch(e) {
             console.log("Audio Error: ", e);
         }
     }
 
-    // ฟังก์ชันเริ่มส่งเสียงเตือนวนลูปต่อเนื่องแบบไม่หยุดจนกว่าจะกดปิด
+    // ฟังก์ชันเริ่มส่งเสียงเตือนวนลูปต่อเนื่องแบบไม่หยุดจนกว่าผู้ใช้จะกดปิด
     function triggerAlarm(med) {
         activeAlarmMed = med;
-        document.getElementById('alarmDetails').innerText = `💊 ยา: ${med.name} (${med.dose})\n📌 จำนวน: ${med.amount} เม็ด/ชิ้น [${med.meal}]\n⏰ เวลา: ${med.time} น.`;
+        const medName = currentLang === 'th' ? (med.nameTH || med.nameEN) : (med.nameEN || med.nameTH);
+        const mealText = getMealText(med.mealKey || 'afterMeal', currentLang);
+
+        document.getElementById('alarmDetails').innerText = `💊 ${currentLang==='th'?'ยา:':'Medicine:'} ${medName} (${med.dose})\n📌 ${currentLang==='th'?'จำนวน:':'Amount:'} ${med.amount} [${mealText}]\n⏰ ${currentLang==='th'?'เวลา:':'Time:'} ${med.time} ${currentLang==='th'?'น.':''}`;
         document.getElementById('alarmModal').style.display = "flex";
 
         showSystemNotification(
-            `🚨 Dee - Dose ได้เวลาทานยาแล้ว! (${profile.pet || '🐱'})`,
-            `ถึงเวลาทานยา: ${med.name} (${med.dose}) - ${med.amount} เม็ด [${med.meal}]`
+            `⏰ Dee - Dose: ${dict[currentLang].alarmTitle}`,
+            `${medName} (${med.dose}) - ${med.amount} [${mealText}]`
         );
 
-        // วนลูปเล่นเสียงเตือนลูปละ 1 วินาทีแบบไม่หยุด
+        // วนลูปเล่นเสียงนาฬิกาปลุกต่อเนื่องทุกๆ 1 วินาที
         if(!alarmInterval) {
-            playPetSound();
+            playAlarmTone();
             alarmInterval = setInterval(() => { 
-                playPetSound(); 
+                playAlarmTone(); 
             }, 1000);
         }
     }
 
-    // ฟังก์ชันทดสอบฟังเสียงแจ้งเตือนสัตว์เลี้ยง
+    // ทดสอบฟังเสียงนาฬิกาปลุก
     function testAlarmSound() {
         unlockAudio();
         triggerAlarm({
-            name: "พาราสีตามอล (ตัวอย่างทดสอบ)",
+            nameTH: "พาราสีตามอล (ตัวอย่างทดสอบ)",
+            nameEN: "Paracetamol (Test Alarm)",
             dose: "500 mg",
             amount: "1",
-            meal: "หลังอาหาร",
+            mealKey: "afterMeal",
             time: "12:00"
         });
     }
 
-    // หยุดเสียงและหยุดวนลูปเมื่อกดปุ่มรับทราบ
+    // หยุดเสียงวนลูปเมื่อกดปุ่มรับทราบ
     function stopAlarm() {
         document.getElementById('alarmModal').style.display = "none";
         if(alarmInterval) {
@@ -973,6 +1011,7 @@
         }
     }
 
+    // ตรวจสอบเวลาทุกๆ 1 วินาที
     setInterval(() => {
         const now = new Date();
         const year = now.getFullYear();
