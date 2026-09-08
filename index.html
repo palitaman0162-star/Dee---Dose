@@ -177,7 +177,7 @@
             </div>
         </div>
         <button onclick="requestNotificationPermission()" style="margin-top: 10px; width: 100%; background: #059669;">🔔 เปิดระบบ Pop-up เตือนบนหน้าจอล็อก (System Notification)</button>
-        <button onclick="testAlarmSound()" style="margin-top: 8px; width: 100%; background: #eab308; color: black;">🔊 ทดสอบฟังเสียงแจ้งเตือนสัตว์เลี้ยง</button>
+        <button onclick="testAlarmSound()" style="margin-top: 8px; width: 100%; background: #eab308; color: black;">🔊 ทดสอบฟังเสียงแจ้งเตือนสัตว์เลี้ยง (เสียงดังต่อเนื่อง)</button>
     </div>
 
     <!-- Quick Presets / Recommendations -->
@@ -821,7 +821,7 @@
         document.getElementById('logModal').style.display = "none";
     }
 
-    // ฟังก์ชันสร้างเสียงสัตว์แบบยาว ชัดเจน และดังต่อเนื่องกังวาน
+    // ฟังก์ชันสร้างเสียงสัตว์แบบใหม่: เสียงดัง คมชัด ก้องกังวาน
     function playPetSound() {
         try {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -831,92 +831,92 @@
             const now = audioCtx.currentTime;
 
             if (pet === '🐱') {
-                // เสียงแมวร้องเหมียวยาวขึ้น เสียงสูงกังวานชัดเจน
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                
-                osc.type = "sine";
-                osc.frequency.setValueAtTime(600, now);
-                osc.frequency.exponentialRampToValueAtTime(1000, now + 0.3);
-                osc.frequency.exponentialRampToValueAtTime(450, now + 1.1);
-
-                gain.gain.setValueAtTime(0.01, now);
-                gain.gain.linearRampToValueAtTime(0.5, now + 0.2);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 1.1);
-
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start(now);
-                osc.stop(now + 1.1);
-
-            } else if (pet === '🐶') {
-                // เสียงหมาหอนยาว เสียงทุ้มกังวานแบบชัดเจนมากๆ (Howl)
+                // เสียงแมวเหมียว เสียงแหลมดังสะใจ
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 
                 osc.type = "sawtooth";
-                osc.frequency.setValueAtTime(250, now);
-                osc.frequency.linearRampToValueAtTime(550, now + 0.4);
-                osc.frequency.linearRampToValueAtTime(300, now + 1.2);
+                osc.frequency.setValueAtTime(500, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.25);
+                osc.frequency.exponentialRampToValueAtTime(400, now + 0.8);
+
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.linearRampToValueAtTime(0.9, now + 0.15); // เร่งความดังขึ้นสูงสุด
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.8);
+
+            } else if (pet === '🐶') {
+                // เสียงสุนัขเห่า/หอนเสียงทุ้มกังวานและเสียงดังลั่น
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = "sawtooth";
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.linearRampToValueAtTime(700, now + 0.3);
+                osc.frequency.linearRampToValueAtTime(350, now + 0.9);
 
                 const filter = audioCtx.createBiquadFilter();
                 filter.type = "lowpass";
-                filter.frequency.setValueAtTime(800, now);
+                filter.frequency.setValueAtTime(1500, now);
 
-                gain.gain.setValueAtTime(0.01, now);
-                gain.gain.linearRampToValueAtTime(0.6, now + 0.3);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.linearRampToValueAtTime(1.0, now + 0.2); // เสียงดังระดับสูงสุด
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.9);
 
                 osc.connect(filter);
                 filter.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start(now);
-                osc.stop(now + 1.2);
+                osc.stop(now + 0.9);
 
             } else if (pet === '🐦') {
-                // เสียงนกร้องสั้นๆ ติดต่อกัน 4 ครั้งให้ก้องกังวาน
-                [0, 0.15, 0.3, 0.45].forEach((delay, index) => {
+                // เสียงนกร้องจิ๊บๆ แหลมแทงรูหูสะใจ
+                [0, 0.12, 0.24, 0.36].forEach((delay, index) => {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
                     
                     osc.type = "sine";
-                    const startFreq = 2500 + (index * 150);
+                    const startFreq = 2800 + (index * 200);
                     osc.frequency.setValueAtTime(startFreq, now + delay);
-                    osc.frequency.linearRampToValueAtTime(startFreq + 700, now + delay + 0.08);
+                    osc.frequency.linearRampToValueAtTime(startFreq + 900, now + delay + 0.08);
 
-                    gain.gain.setValueAtTime(0.01, now + delay);
-                    gain.gain.linearRampToValueAtTime(0.4, now + delay + 0.02);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.1);
+                    gain.gain.setValueAtTime(0.05, now + delay);
+                    gain.gain.linearRampToValueAtTime(0.8, now + delay + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.09);
 
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
                     osc.start(now + delay);
-                    osc.stop(now + delay + 0.1);
+                    osc.stop(now + delay + 0.09);
                 });
 
             } else if (pet === '🐷') {
-                // เสียงหมูร้องกวนๆ ดังชัดเจน
-                [0, 0.35].forEach(delay => {
+                // เสียงหมูร้องอู๊ดๆ ดังสนั่น
+                [0, 0.25].forEach(delay => {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
                     
                     osc.type = "sawtooth";
-                    osc.frequency.setValueAtTime(160, now + delay);
-                    osc.frequency.linearRampToValueAtTime(110, now + delay + 0.28);
+                    osc.frequency.setValueAtTime(220, now + delay);
+                    osc.frequency.linearRampToValueAtTime(140, now + delay + 0.2);
 
                     const filter = audioCtx.createBiquadFilter();
                     filter.type = "lowpass";
-                    filter.frequency.setValueAtTime(500, now + delay);
+                    filter.frequency.setValueAtTime(800, now + delay);
 
-                    gain.gain.setValueAtTime(0.01, now + delay);
-                    gain.gain.linearRampToValueAtTime(0.5, now + delay + 0.05);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.28);
+                    gain.gain.setValueAtTime(0.05, now + delay);
+                    gain.gain.linearRampToValueAtTime(0.9, now + delay + 0.04);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.2);
 
                     osc.connect(filter);
                     filter.connect(gain);
                     gain.connect(audioCtx.destination);
                     osc.start(now + delay);
-                    osc.stop(now + delay + 0.28);
+                    osc.stop(now + delay + 0.2);
                 });
             }
 
@@ -926,7 +926,7 @@
         }
     }
 
-    // ฟังก์ชันเริ่มส่งเสียงเตือนวนลูปต่อเนื่องแบบไม่หยุด
+    // ฟังก์ชันเริ่มส่งเสียงเตือนวนลูปต่อเนื่องแบบไม่หยุดจนกว่าจะกดปิด
     function triggerAlarm(med) {
         activeAlarmMed = med;
         document.getElementById('alarmDetails').innerText = `💊 ยา: ${med.name} (${med.dose})\n📌 จำนวน: ${med.amount} เม็ด/ชิ้น [${med.meal}]\n⏰ เวลา: ${med.time} น.`;
@@ -937,12 +937,12 @@
             `ถึงเวลาทานยา: ${med.name} (${med.dose}) - ${med.amount} เม็ด [${med.meal}]`
         );
 
-        // วนลูปเล่นเสียงทุกๆ 1.2 วินาทีอย่างต่อเนื่อง
+        // วนลูปเล่นเสียงเตือนลูปละ 1 วินาทีแบบไม่หยุด
         if(!alarmInterval) {
             playPetSound();
             alarmInterval = setInterval(() => { 
                 playPetSound(); 
-            }, 1200);
+            }, 1000);
         }
     }
 
