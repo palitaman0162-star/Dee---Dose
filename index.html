@@ -1,3 +1,298 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dee - Dose ระบบเตือนทานยา</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif, system-ui;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        input, select, button {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+        }
+
+        .med-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            text-align: center;
+        }
+
+        .cal-day-name {
+            font-weight: bold;
+            padding: 5px;
+        }
+
+        .cal-date {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 8px 4px;
+            min-height: 40px;
+            cursor: pointer;
+        }
+
+        .cal-date.today {
+            background: #e0f2fe;
+            border-color: #0284c7;
+        }
+
+        .cal-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: #22c55e;
+            border-radius: 50%;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Header & Language & Profile -->
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>🏥 Dee - Dose</h2>
+            <select id="langSelect" onchange="changeLang()">
+                <option value="th">🇹🇭 ภาษาไทย</option>
+                <option value="en">🇬🇧 English</option>
+            </select>
+        </div>
+        <hr style="margin: 15px 0; border: none; border-top: 1px solid var(--border);">
+        <h3 id="t-profileHeader">ข้อมูลผู้ใช้ & คู่หูดูแลสุขภาพ</h3>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <div class="form-group" style="flex:1;">
+                <label id="t-genderLabel">เพศ</label>
+                <select id="userGender" onchange="saveProfile()">
+                    <option value="male">ชาย</option>
+                    <option value="female">หญิง</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label id="t-ageLabel">ช่วงวัย</label>
+                <select id="userAge" onchange="saveProfile()">
+                    <option value="child">เด็ก</option>
+                    <option value="adult">ผู้ใหญ่</option>
+                    <option value="elder">ผู้สูงอายุ</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>คู่หูสัตว์เลี้ยง</label>
+                <select id="petSelect" onchange="updatePet()">
+                    <option value="🐱">🐱 แมว (Meow)</option>
+                    <option value="🐶">🐶 หมา (Bark)</option>
+                    <option value="🐦">🐦 นก (Chirp)</option>
+                    <option value="🐷">🐷 หมู (Oink)</option>
+                </select>
+            </div>
+        </div>
+        <button onclick="requestNotificationPermission()" style="margin-top: 10px; width: 100%; background: #059669;">🔔 เปิดการแจ้งเตือนนอกหน้าเว็บ (Push Notification)</button>
+    </div>
+
+    <!-- Quick Presets / Recommendations -->
+    <div class="card">
+        <h3 id="t-recHeader">💡 ยาน่ารู้ & กดบันทึกด่วน (Quick Presets)</h3>
+        <div id="recommendedContainer"></div>
+    </div>
+
+    <!-- Add/Edit Medicine Form -->
+    <div class="card">
+        <h3 id="formTitle">เพิ่มรายการยาใหม่</h3>
+        <input type="hidden" id="editId">
+        
+        <div class="form-group">
+            <label id="t-medName">ชื่อยา</label>
+            <input type="text" id="medName" placeholder="เช่น พาราสีตามอล">
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex:1;">
+                <label id="t-medDose">ขนาดยา</label>
+                <input type="text" id="medDose" placeholder="เช่น 500mg">
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label id="t-medAmount">จำนวนต่อครั้ง</label>
+                <input type="number" id="medAmount" value="1">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex:1;">
+                <label id="t-medCategory">หมวดหมู่ยา</label>
+                <select id="medCategory">
+                    <option value="⚪ ยาเม็ด (Tablet)">⚪ ยาเม็ด (Tablet)</option>
+                    <option value="💊 แคปซูล (Capsule)">💊 แคปซูล (Capsule)</option>
+                    <option value="🥤 ผงละลายน้ำ/ยาน้ำ (Liquid)">🥤 ยาน้ำ/ยาน้ำแขวนตะกอน</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label id="t-medMeal">ช่วงเวลาทานยา</label>
+                <select id="medMeal">
+                    <option value="หลังอาหาร (After Meals)">หลังอาหาร (After Meals)</option>
+                    <option value="ก่อนอาหาร (Before Meals)">ก่อนอาหาร (Before Meals)</option>
+                    <option value="ก่อนนอน (Before Bed)">ก่อนนอน (Before Bed)</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <div class="form-group" style="flex:1;">
+                <label id="t-startDate">วันเริ่มต้น</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label id="t-endDate">วันสิ้นสุด</label>
+                <input type="date" id="endDate">
+                <label style="cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px; margin-top: 4px;">
+                    <input type="checkbox" id="everydayCheck" onchange="toggleEverydayOption()"> 🔄 ทานทุกวัน (ไม่มีวันสิ้นสุด)
+                </label>
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label id="t-medTime">เวลาแจ้งเตือน</label>
+                <input type="time" id="medTime">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button id="btnSave" onclick="saveMedicine()" style="flex:1;">บันทึกข้อมูลยา Dee - Dose</button>
+            <button id="btnCancel" onclick="resetForm()" style="background:#64748b; display:none;">ยกเลิก</button>
+        </div>
+    </div>
+
+    <!-- Medicine List -->
+    <div class="card">
+        <h3 id="t-listHeader">รายการยาที่ต้องรับประทาน</h3>
+        <div id="medicineList"></div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <button onclick="changeMonth(-1)">&lt;</button>
+            <h3 id="calMonthYear" style="margin:0;"></h3>
+            <button onclick="changeMonth(1)">&gt;</button>
+        </div>
+        <div class="cal-grid" id="calDaysName"></div>
+        <div class="cal-grid" id="calGrid" style="margin-top:8px;"></div>
+    </div>
+
+    <!-- Access Logs -->
+    <div class="card">
+        <h3>📜 ประวัติการเข้าใช้งานระบบ</h3>
+        <table style="width:100%; border-collapse: collapse; font-size: 13px;">
+            <thead>
+                <tr style="border-bottom: 1px solid var(--border); text-align: left;">
+                    <th style="padding: 6px;">เวลา</th>
+                    <th style="padding: 6px;">อุปกรณ์</th>
+                </tr>
+            </thead>
+            <tbody id="accessLogList"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- Modal สรุปประวัติการทานยาประจำวัน -->
+<div id="logModal" class="modal">
+    <div class="modal-content">
+        <h3 id="logDateTitle">📅 ประวัติการทานยา</h3>
+        <div id="logContent" style="margin: 15px 0;"></div>
+        <button onclick="closeLogModal()" style="width:100%;">ปิดหน้าต่าง</button>
+    </div>
+</div>
+
+<!-- Modal สัญญาณเตือนเมื่อถึงเวลา -->
+<div id="alarmModal" class="modal">
+    <div class="modal-content" style="text-align: center;">
+        <span id="alarmPet" style="font-size: 60px;">🐱</span>
+        <h2 id="t-alarmTitle" style="color: #dc2626; margin: 10px 0;">🚨 ได้เวลาทานยาแล้ว!</h2>
+        <p id="petTalk" style="color: #475569;">อย่าลืมทานยาให้ตรงเวลานะครับ!</p>
+        <div id="alarmDetails" style="background: #f1f5f9; padding: 10px; border-radius: 8px; margin: 15px 0; text-align: left; font-size: 14px; whitespace: pre-line;"></div>
+        <button onclick="stopAlarm()" style="width:100%; background: #22c55e; font-size: 16px; padding: 12px;">✅ ทานยาเรียบร้อยแล้ว</button>
+    </div>
+</div>
+
 <script>
     let swRegistration = null;
     let medicines = JSON.parse(localStorage.getItem('deedose_items')) || [];
@@ -10,7 +305,6 @@
     let activeAlarmMed = null;
     let calDate = new Date();
 
-    // 🔊 ปลดล็อกระบบเสียงเมื่อมีการแตะหรือคลิกบนหน้าเว็บครั้งแรก
     function unlockAudio() {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -22,7 +316,6 @@
     window.addEventListener('click', unlockAudio, { once: true });
     window.addEventListener('touchstart', unlockAudio, { once: true });
 
-    // ลงทะเบียน Service Worker สำหรับแจ้งเตือนภายนอกหน้าเว็บ
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('sw.js').then(reg => {
@@ -31,7 +324,6 @@
         });
     }
 
-    // รายการยาแนะนำและคลังยาด่วนพร้อมกดใช้งาน (Quick Presets)
     const recommendedMeds = [
         {
             name: "พาราสีตามอล (Paracetamol)",
@@ -41,8 +333,7 @@
             meal: "หลังอาหาร (After Meals)",
             time: "08:00",
             propTH: "บรรเทาอาการปวดระดับเล็กน้อยถึงปานกลาง และลดไข้",
-            propEN: "Relieves mild to moderate pain and reduces fever.",
-            warningTH: "ห้ามทานเกิน 8 เม็ด/วัน (4,000 mg) และไม่ควรทานติดต่อกันเกิน 5 วัน"
+            propEN: "Relieves mild to moderate pain and reduces fever."
         },
         {
             name: "เซทิริซีน (Cetirizine)",
@@ -52,8 +343,7 @@
             meal: "ก่อนนอน (Before Bed)",
             time: "21:00",
             propTH: "รักษาอาการแพ้ เช่น น้ำมูกไหล จาม ผื่นคัน คันตา",
-            propEN: "Treats allergy symptoms like runny nose, sneezing, and hives.",
-            warningTH: "อาจทำให้เกิดอาการง่วงซึม ควรระวังการขับขี่ยานพาหนะ"
+            propEN: "Treats allergy symptoms like runny nose, sneezing, and hives."
         },
         {
             name: "ยาธาตุน้ำขาว (Salol & Menthol)",
@@ -63,8 +353,7 @@
             meal: "หลังอาหาร (After Meals)",
             time: "12:00",
             propTH: "แก้ปวดท้อง จุกเสียด แน่นท้อง ท้องเสียถ่ายเป็นน้ำ",
-            propEN: "Relieves stomachache, flatulence, and mild diarrhea.",
-            warningTH: "เขย่าขวดก่อนทานทุกครั้ง"
+            propEN: "Relieves stomachache, flatulence, and mild diarrhea."
         },
         {
             name: "อม็อกซีซิลลิน (Amoxicillin)",
@@ -74,8 +363,7 @@
             meal: "หลังอาหาร (After Meals)",
             time: "08:00",
             propTH: "ต้านเชื้อแบคทีเรีย รักษาการติดเชื้อทางเดินหายใจ/คออักเสบ",
-            propEN: "Antibiotic used to treat bacterial infections.",
-            warningTH: "ต้องทานติดต่อกันจนหมดตามแพทย์/เภสัชกรสั่ง ห้ามหยุดยาเอง"
+            propEN: "Antibiotic used to treat bacterial infections."
         },
         {
             name: "ยาแก้ไอ ดักเสมหะ (Bromhexine)",
@@ -85,8 +373,7 @@
             meal: "หลังอาหาร (After Meals)",
             time: "13:00",
             propTH: "ช่วยขับเสมหะ ละลายเสมหะ บรรเทาอาการไอ",
-            propEN: "Mucolytic agent for easing coughs with mucus.",
-            warningTH: "ควรดื่มน้ำตามมากๆ เพื่อช่วยละลายเสมหะ"
+            propEN: "Mucolytic agent for easing coughs with mucus."
         }
     ];
 
@@ -130,11 +417,10 @@
         const accessLogs = JSON.parse(localStorage.getItem('deedose_access_history')) || [];
         const tbody = document.getElementById('accessLogList');
         if(tbody) {
-            tbody.innerHTML = accessLogs.map(l => `<tr><td>${l.time}</td><td>${l.device}</td></tr>`).join('');
+            tbody.innerHTML = accessLogs.map(l => `<tr><td style="padding:6px;">${l.time}</td><td style="padding:6px;">${l.device}</td></tr>`).join('');
         }
     }
 
-    // ขออนุญาตแจ้งเตือน Pop-up นอกหน้าเว็บ
     function requestNotificationPermission() {
         unlockAudio();
         if ('Notification' in window) {
@@ -151,7 +437,6 @@
         }
     }
 
-    // แสดงการแจ้งเตือนแบบ Pop-up ภายนอกหน้าเว็บ
     function showSystemNotification(title, body) {
         if ('Notification' in window && Notification.permission === 'granted') {
             const options = {
@@ -173,7 +458,6 @@
     document.getElementById('userGender').value = profile.gender;
     document.getElementById('userAge').value = profile.age;
     document.getElementById('petSelect').value = profile.pet;
-    document.getElementById('petDisplay').innerText = profile.pet;
     document.getElementById('alarmPet').innerText = profile.pet;
 
     function saveProfile() {
@@ -184,9 +468,8 @@
     }
 
     function updatePet() {
-        const pet = document.getElementById('petSelect').value;
-        document.getElementById('petDisplay').innerText = pet;
-        document.getElementById('alarmPet').innerText = pet;
+        profile.pet = document.getElementById('petSelect').value;
+        document.getElementById('alarmPet').innerText = profile.pet;
         saveProfile();
     }
 
@@ -206,7 +489,6 @@
         document.getElementById('t-endDate').innerText = t.endDate;
         document.getElementById('t-medTime').innerText = t.medTime;
         document.getElementById('t-listHeader').innerText = t.listHeader;
-        document.getElementById('t-calHeader').innerText = t.calHeader;
         document.getElementById('t-alarmTitle').innerText = t.alarmTitle;
         document.getElementById('petTalk').innerText = t.petTalk;
        
@@ -225,20 +507,19 @@
         recommendedMeds.forEach((m, idx) => {
             const prop = currentLang === 'th' ? m.propTH : m.propEN;
             container.innerHTML += `
-                <div class="rec-card" style="border: 1px solid #e2e8f0; padding: 12px; border-radius: 10px; margin-bottom: 10px;">
-                    <h4>💊 ${m.name}</h4>
-                    <p style="font-size:13px; color:#475569;"><strong>สรรพคุณ:</strong> ${prop}</p>
-                    <p style="font-size:12px; color:#64748b;"><strong>ขนาดยา:</strong> ${m.dose} | ⏰ เวลาแนะนำ: ${m.time} น.</p>
-                    <div style="margin-top: 8px; display: flex; gap: 8px;">
-                        <button class="btn-use-rec" onclick="useRecommendation(${idx})" style="padding:4px 8px; font-size:12px;">✏️ แก้ไขข้อมูลก่อนบันทึก</button>
-                        <button onclick="quickAddPreset(${idx})" style="padding:4px 8px; font-size:12px; background:#22c55e; color:white; border:none; border-radius:5px; cursor:pointer;">⚡ เพิ่มยาเข้าตารางทันที (ทุกวัน)</button>
+                <div style="border: 1px solid var(--border); padding: 12px; border-radius: 10px; margin-bottom: 10px;">
+                    <h4 style="margin:0 0 4px 0;">💊 ${m.name}</h4>
+                    <p style="font-size:13px; color:#475569; margin:4px 0;"><strong>สรรพคุณ:</strong> ${prop}</p>
+                    <p style="font-size:12px; color:#64748b; margin:4px 0;"><strong>ขนาดยา:</strong> ${m.dose} | ⏰ เวลาแนะนำ: ${m.time} น.</p>
+                    <div style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button onclick="useRecommendation(${idx})" style="padding:6px 10px; font-size:12px; background:#f1f5f9; color:#0f172a; border:1px solid var(--border);">✏️ แก้ไขก่อนบันทึก</button>
+                        <button onclick="quickAddPreset(${idx})" style="padding:6px 10px; font-size:12px; background:#22c55e;">⚡ เพิ่มเข้าตารางทันที (ทุกวัน)</button>
                     </div>
                 </div>
             `;
         });
     }
 
-    // ฟังก์ชันเพิ่มยาจากคลังยาด่วนทันทีโดยไม่ต้องพิมพ์
     function quickAddPreset(idx) {
         unlockAudio();
         const rec = recommendedMeds[idx];
@@ -252,7 +533,7 @@
             category: rec.category,
             meal: rec.meal,
             start: todayStr,
-            end: "2099-12-31", // ทานต่อเนื่องทุกวัน
+            end: "2099-12-31",
             isEveryday: true,
             time: rec.time || "08:00"
         };
@@ -261,7 +542,7 @@
         localStorage.setItem('deedose_items', JSON.stringify(medicines));
         renderList();
         renderCalendar();
-        alert(`เพิ่มรายการ "${rec.name}" เข้าตารางแจ้งเตือนประจำวันเรียบร้อยแล้ว!`);
+        alert(`เพิ่มรายการ "${rec.name}" เรียบร้อยแล้ว!`);
     }
 
     function useRecommendation(idx) {
@@ -275,7 +556,6 @@
         document.getElementById('medTime').value = rec.time || "08:00";
         document.getElementById('startDate').value = todayStr;
        
-        // ปรับเป็นทานทุกวันอัตโนมัติ
         const everydayCheck = document.getElementById('everydayCheck');
         if (everydayCheck) everydayCheck.checked = true;
         toggleEverydayOption();
@@ -311,7 +591,7 @@
         const editId = document.getElementById('editId').value;
 
         if (isEveryday) {
-            end = "2099-12-31"; // กำหนดให้แจ้งเตือนทุกวันแบบไม่มีวันหมดอายุ
+            end = "2099-12-31";
         }
 
         if(!name || !dose || !amount || !time || !start || !end) {
@@ -397,15 +677,15 @@
             const durationText = (m.isEveryday || m.end === "2099-12-31") ? "🔄 ทานทุกวัน (ไม่มีวันสิ้นสุด)" : `📅 ${m.start} ถึง ${m.end}`;
             container.innerHTML += `
                 <div class="med-card">
-                    <div class="med-info">
-                        <h4>${m.name} (${m.dose})</h4>
-                        <p><strong>รูปแบบ:</strong> ${m.category} | <strong>ทานครั้งละ:</strong> ${m.amount} เม็ด/ชิ้น</p>
-                        <p>📌 <strong>ช่วงเวลา:</strong> ${m.meal}</p>
-                        <p>${durationText} | ⏰ <strong>${m.time} น.</strong></p>
+                    <div>
+                        <h4 style="margin:0 0 4px 0;">${m.name} (${m.dose})</h4>
+                        <p style="margin:2px 0; font-size:13px;"><strong>รูปแบบ:</strong> ${m.category} | <strong>ทานครั้งละ:</strong> ${m.amount} เม็ด/ชิ้น</p>
+                        <p style="margin:2px 0; font-size:13px;">📌 <strong>ช่วงเวลา:</strong> ${m.meal}</p>
+                        <p style="margin:2px 0; font-size:13px;">${durationText} | ⏰ <strong>${m.time} น.</strong></p>
                     </div>
-                    <div class="med-actions">
-                        <button class="btn-sm btn-edit" onclick="editMed(${m.id})">✏️</button>
-                        <button class="btn-sm btn-delete" onclick="deleteMed(${m.id})">🗑️</button>
+                    <div style="display:flex; gap:6px;">
+                        <button onclick="editMed(${m.id})" style="background:#e2e8f0; color:#0f172a;">✏️</button>
+                        <button onclick="deleteMed(${m.id})" style="background:#ef4444;">🗑️</button>
                     </div>
                 </div>
             `;
@@ -496,7 +776,6 @@
         document.getElementById('logModal').style.display = "none";
     }
 
-    // 🔊 ระบบสังเคราะห์เสียงสัตว์เลี้ยงตามตัวเลือกผู้ใช้
     function playPetSound() {
         try {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -506,7 +785,6 @@
             const now = audioCtx.currentTime;
 
             if (pet === '🐱') {
-                // 🐱 เสียงแมวเมี๊ยว (Meow)
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = "sine";
@@ -524,7 +802,6 @@
                 osc.stop(now + 0.65);
 
             } else if (pet === '🐶') {
-                // 🐶 เสียงหมาเห่า (Bark)
                 [0, 0.18].forEach(delay => {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
@@ -541,8 +818,7 @@
                     osc.stop(now + delay + 0.11);
                 });
 
-            } else if (pet === '🐦' || pet === '🐤') {
-                // 🐦 เสียงนกร้องจิ๊บๆ (Chirp)
+            } else if (pet === '🐦') {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = "sine";
@@ -559,7 +835,6 @@
                 osc.stop(now + 0.16);
 
             } else if (pet === '🐷') {
-                // 🐷 เสียงหมู (Oink)
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = "sawtooth";
@@ -567,22 +842,6 @@
                 osc.frequency.linearRampToValueAtTime(90, now + 0.2);
 
                 gain.gain.setValueAtTime(0.4, now);
-                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start(now);
-                osc.stop(now + 0.2);
-
-            } else {
-                // เสียงเตือนทั่วไป
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = "sine";
-                osc.frequency.setValueAtTime(600, now);
-                osc.frequency.exponentialRampToValueAtTime(900, now + 0.2);
-
-                gain.gain.setValueAtTime(0.3, now);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
 
                 osc.connect(gain);
@@ -602,7 +861,6 @@
         document.getElementById('alarmDetails').innerText = `💊 ยา: ${med.name} (${med.dose})\n📌 จำนวน: ${med.amount} เม็ด/ชิ้น [${med.meal}]\n⏰ เวลา: ${med.time} น.`;
         document.getElementById('alarmModal').style.display = "flex";
 
-        // แสดง Pop-up Notification นอกหน้าเว็บ
         showSystemNotification(
             `🚨 Dee - Dose ได้เวลาทานยาแล้ว! (${profile.pet || '🐱'})`,
             `ยา: ${med.name} (${med.dose}) - ทาน ${med.amount} เม็ด [${med.meal}]`
@@ -628,7 +886,6 @@
         }
     }
 
-    // ตรวจสอบเวลาเตือนทานยา
     setInterval(() => {
         const now = new Date();
         const year = now.getFullYear();
@@ -655,3 +912,6 @@
     renderList();
     renderCalendar();
 </script>
+
+</body>
+</html>
